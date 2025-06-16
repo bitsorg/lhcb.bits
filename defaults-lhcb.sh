@@ -1,4 +1,4 @@
-package: defaults-o2
+package: defaults-lhcb
 version: v1
 env:
   CFLAGS: -fPIC -O2
@@ -12,19 +12,6 @@ disable:
   - mesos
   - MySQL
 overrides:
-  AliPhysics:
-    version: '%(commit_hash)s_O2'
-  AliRoot:
-    version: '%(commit_hash)s_O2'
-    requires:
-      - ROOT
-      - DPMJET
-      - fastjet:(?!.*ppc64)
-      - GEANT3
-      - GEANT4_VMC
-      - Vc
-      - ZeroMQ
-      - JAliEn-ROOT
   cgal:
     version: 4.12.2
 ---
