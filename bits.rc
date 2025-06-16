@@ -1,0 +1,8 @@
+[bits]
+  organisation=LHCB
+
+[LHCB]
+  pkg_prefix=VO_LHCB
+  sw_dir=../sw2
+  repo_dir=.
+  search_path=bits,general,simulation,hepmc,analysis,ml
