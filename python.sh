@@ -15,6 +15,7 @@ env:
   SSL_CERT_FILE: "$(export PATH=$PYTHON_ROOT/bin:$PATH; export LD_LIBRARY_PATH=$PYTHON_ROOT/lib:$LD_LIBRARY_PATH; python -c \"import certifi; print(certifi.where())\")"
   PYTHONHOME: "$PYTHON_ROOT"
   PYTHONPATH: "$PYTHON_ROOT/lib/python/site-packages"
+  
 prefer_system: "(?!slc5|ubuntu)"
 prefer_system_check: |
     MIN_ALIBUILD_VERSION_REGEX="v1.17.12"
@@ -155,6 +156,7 @@ mkdir -p "$MODULEDIR"
 alibuild-generate-module --bin --lib > "$MODULEFILE"
 cat >> "$MODULEFILE" <<EoF
 setenv PYTHONHOME \$PKG_ROOT
+setenv PYTHONFULLPATH \$PKG_ROOT/bin/python3.9
 prepend-path PYTHONPATH \$PKG_ROOT/lib/python/site-packages
 if { [module-info mode load] } {
   setenv SSL_CERT_FILE  [exec \$PKG_ROOT/bin/python3 -c "import certifi; print(certifi.where())"]
