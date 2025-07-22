@@ -3,6 +3,7 @@
 
 [LHCB]
   pkg_prefix=VO_LHCB
-  sw_dir=../sw
+  sw_dir=../sw-lhcb
   repo_dir=.
   search_path=bits,general,simulation,hepmc,analysis,ml
+  
