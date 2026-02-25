@@ -158,6 +158,8 @@ cat >> "$MODULEFILE" <<EoF
 setenv PYTHONHOME \$PKG_ROOT
 setenv PYTHONFULLPATH \$PKG_ROOT/bin/python3.9
 prepend-path PYTHONPATH \$PKG_ROOT/lib/python/site-packages
+prepend-path LD_LIBRARY_PATH \$PKG_ROOT/lib
+prepend-path LD_LIBRARY_PATH \$PKG_ROOT/lib64
 if { [module-info mode load] } {
   setenv SSL_CERT_FILE  [exec \$PKG_ROOT/bin/python3 -c "import certifi; print(certifi.where())"]
 }

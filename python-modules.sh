@@ -58,4 +58,5 @@ alibuild-generate-module --bin > "$INSTALLROOT/etc/modulefiles/$PKGNAME"
 cat >> "$INSTALLROOT/etc/modulefiles/$PKGNAME" <<EOF
 # We need to use lib/python$pyver, not lib/python here so that tensorflow-metal works on Mac.
 prepend-path PYTHONPATH \$PKG_ROOT/lib/python$pyver/site-packages
+prepend-path PATH \$PKG_ROOT/bin
 EOF
