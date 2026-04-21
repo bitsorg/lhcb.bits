@@ -4,6 +4,8 @@ tag: "v40r2"
 source: https://gitlab.cern.ch/gaudi/Gaudi.git
 requires:
   - "GCC-Toolchain:(?!osx)"
+  - common.bits
+  - stacks.bits
   - rangev3
   - boost
   - ROOT
