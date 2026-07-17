@@ -7,7 +7,11 @@ version: v1
 # .meta.json (cvmfs_templates); the publish pipeline resolves them there, so the
 # path is never defined in bits-console.
 system:
-  # CVMFS root prefix is authoritative in bits-console ui-config.yaml (auth boundary).
+  # {prefix} is the releases ROOT (auth boundary). bits-console (ui-config.yaml:
+  # cvmfs_prefix) injects the authoritative value, which WINS; the value below MUST
+  # match it (kept in sync by bits-admin PR) or an injected build refuses to publish.
+  # It lets local `bits build` (no injection) work and is a checked declaration.
+  prefix:                     "/cvmfs/sft-nightlies-test.cern.ch/lhcb/releases"
   cvmfs_user_prefix:          "/cvmfs/sft-nightlies-test.cern.ch/lhcb/user"  # sibling of releases, not {prefix}/user
   cvmfs_releases_template:    "{prefix}/{pkg}/{tag}/{platform}"
   cvmfs_modules_template:     "{prefix}/{platform}/Modules/modulefiles/{pkg}"
