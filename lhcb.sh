@@ -25,7 +25,7 @@ requires:
   - rangev3
   - ZeroMQ
   - Clang
-  - CLHEP
+  - clhep
   - boost
   - Python-modules
   - ROOT

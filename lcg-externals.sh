@@ -1,12 +1,5 @@
 package: lcg-externals
-description: LHCb top-level LCG externals meta-package. Requires the full LHCb
-  externals set (the .heptools.packages[] list from lhcb-core/rpm-recipes
-  LHCBEXTERNALS/dev4lhcb.json), so building this one target pulls the whole LHCb
-  externals closure from lcg.bits — the bits analog of lcgcmake's
-  LCG_top_packages()/`top_packages` target. Package versions come from the
-  selected lcg.bits release branch (--flavour release=...); LHCb-specific version
-  and variant deltas are pinned in defaults-lhcb.sh. Gaudi is NOT here (it is a
-  project, built from lhcb.bits/gaudi.sh, not an external).
+description: LHCb top-level LCG externals meta-package.
 version: "1"
 license: Apache-2.0
 requires:

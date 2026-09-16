@@ -4,21 +4,18 @@ tag: "v40r2"
 source: https://gitlab.cern.ch/gaudi/Gaudi.git
 requires:
   - "GCC-Toolchain:(?!osx)"
-  - stacks.bits
   - rangev3
   - boost
   - ROOT
   - cppgsl
   - fmt
   - HepPDT
-  - CLHEP
-  - TBB
+  - clhep
+  - tbb
   - xercesc
   - CppUnit
   - Catch2
   - cppgsl
-  - Python-modules
-  - Python-modules-list
   - Python
   
 build_requires:

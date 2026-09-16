@@ -6,7 +6,7 @@ sources:
 
 requires:
   - "GCC-Toolchain:(?!osx)"
-  - CLHEP
+  - clhep
   - ROOT
   
 build_requires:
