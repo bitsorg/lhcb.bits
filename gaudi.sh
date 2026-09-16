@@ -5,14 +5,14 @@ source: https://gitlab.cern.ch/gaudi/Gaudi.git
 requires:
   - "GCC-Toolchain:(?!osx)"
   - rangev3
-  - boost
+  - Boost
   - ROOT
   - cppgsl
   - fmt
   - HepPDT
   - clhep
   - tbb
-  - xercesc
+  - XercesC
   - CppUnit
   - Catch2
   - cppgsl
