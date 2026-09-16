@@ -50,6 +50,24 @@ overrides:
   # has to be here (mirrors defaults-atlas.sh).
   lcg.bits:
     tag: "%(release)s"
+
+  # --- LHCb externals deltas vs the LCG_110 base (from heptools-dev4lhcb) ---
+  # Core externals the LHCb software (Gaudi v40r2, LHCb v58r8, ...) compiles
+  # against; LHCb pins these OLDER than the LCG_110 base. ROOT <6.40 is handled
+  # by lcg.bits/ROOT.sh; Boost is a plain tarball pin. (hepmc3 3.3.1 already
+  # matches the base, so no override.) DD4hep is pinned to 01.36 and built
+  # minimal via the disable: block below. Generator .lhcb variants are separate
+  # recipe work (patches to port from lcgcmake).
+  ROOT:
+    version: "v6.36.04"
+    tag: "v6-36-04"
+  Boost:
+    version: "1.89.0"
+    tag: "1.89.0"
+  DD4hep:
+    version: "v01-36"
+    tag: "v01-36"
+
   Gaudi:
     tag: "v40r2"
   Detector:
@@ -62,4 +80,14 @@ overrides:
     tag: "v39r8"
   Allen:
     tag: "v7r8"
+
+# LHCb DD4hep is built minimal (ROOT/XercesC geometry only), like lcgcmake's
+# heptools-lhcbsetup. Disabling these backends prunes them from DD4hep's requires
+# (and thus from the externals closure — none are LHCb top-level externals in
+# dev4lhcb.json); lcg.bits/DD4hep.sh then sets -DDD4HEP_USE_* OFF automatically
+# because their <PKG>_ROOT is unset. (podio drops out with EDM4hep/LCIO.)
+disable:
+  - Geant4
+  - LCIO
+  - EDM4hep
 ---
