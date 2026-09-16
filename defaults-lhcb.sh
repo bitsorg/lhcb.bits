@@ -68,6 +68,26 @@ overrides:
     version: "v01-36"
     tag: "v01-36"
 
+  # LHCb-patched generators (.lhcb arms in lcg.bits, version-gated). Same upstream
+  # tarball as the base/.atlas build; only the source patch differs.
+  photoscpp:
+    version: "3.64.lhcb"
+    tag: "v3.64.lhcb"
+  tauolacpp:
+    version: "1.1.9.lhcb"
+    tag: "v1.1.9.lhcb"
+  crmc:
+    version: "2.0.1p6.lhcb"
+    tag: "2.0.1p6.lhcb"
+  # madgraph diverges (LHCb 3.5.9.atlas13 vs base/ATLAS 3.5.11.atlas16): the
+  # override carries the alternative 3.5.9 source; the recipe's version-gated
+  # 3.5.9.atlas13 patch arm then activates.
+  madgraph5amc:
+    version: "3.5.9.atlas13"
+    tag: "3.5.9.atlas13"
+    sources:
+      - https://lcgpackages.web.cern.ch/tarFiles/sources/MCGeneratorsTarFiles/MG5_aMC_v3.5.9.tar.gz
+
   Gaudi:
     tag: "v40r2"
   Detector:
