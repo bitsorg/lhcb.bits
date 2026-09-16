@@ -44,6 +44,12 @@ package_family:
     - Gaudi
 
 overrides:
+  # Build lcg.bits at the selected release branch (--flavour release=<X>, e.g.
+  # LCG_110). Must be in this configDir overlay: the provider is cloned on the
+  # early path before stacks.bits' defaults-release is applied, so the override
+  # has to be here (mirrors defaults-atlas.sh).
+  lcg.bits:
+    tag: "%(release)s"
   Gaudi:
     tag: "v40r2"
   Detector:
