@@ -56,6 +56,4 @@ overrides:
     tag: "v39r8"
   Allen:
     tag: "v7r8"
-  stacks.bits:
-    tag: "v109"
 ---
