@@ -4,6 +4,7 @@ description: LHCb LCG externals manifest (LCG_externals_<platform>.txt) over the
 # from the build-wide `release` variable (--set release=LCG_<N>) — same value that
 # drives defaults-lhcb's `lcg.bits: tag` and the CVMFS {release} slot.
 version_from: release
+view: true          # `bits enter lcg-view/<version>` auto-collapses paths onto the merged view
 requires:
   # lcg-externals is LHCb's top-level LCG closure (dev4lhcb.json). Requiring it puts
   # lcg-view at the TOP of the graph → built LAST, after the whole closure, in the
