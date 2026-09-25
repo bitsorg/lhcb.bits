@@ -32,9 +32,9 @@ system:
   # match it (kept in sync by bits-admin PR) or an injected build refuses to publish.
   prefix:                     "/cvmfs/bits.cern.ch/lhcb/releases"
   cvmfs_user_prefix:          "/cvmfs/bits.cern.ch/lhcb/user"  # sibling of releases, not {prefix}/user
-  cvmfs_releases_template:    "{prefix}/{pkg}/{tag}/{platform}"
-  cvmfs_modules_template:     "{prefix}/{platform}/Modules/modulefiles/{pkg}"
-  cvmfs_shared_path_template: "{prefix}/noarch/{pkg}/{tag}"
+  cvmfs_releases_template:    "{prefix}/{release}/{pkg}/{tag}/{platform}"
+  cvmfs_modules_template:     "{prefix}/{release}/{platform}/Modules/modulefiles/{pkg}"
+  cvmfs_shared_path_template: "{prefix}/{release}/noarch/{pkg}/{tag}"
 
 package_family:
   default: externals
