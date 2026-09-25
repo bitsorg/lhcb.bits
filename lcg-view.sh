@@ -20,7 +20,7 @@ env:
   # LbDevTools reads $LCG_RELEASE_BASE/LCG_<ver>/LCG_externals_<platform>.txt. It is
   # this package's install prefix (the dir that contains LCG_<ver>/).
   LCG_RELEASE_BASE: "$LCG_VIEW_ROOT"
-  # LCG_PLATFORM is DERIVED in the body from $ARCHITECTURE (opt/dbg already glued on
+  # LCG_PLATFORM is DERIVED in the body from $EFFECTIVE_ARCHITECTURE (opt/dbg already glued on
   # by the ::opt/::dbg defaults), so the manifest filename can never drift from the
   # scanned arch subtree. Set LCG_PLATFORM in the build env to override.
 ---
@@ -46,11 +46,12 @@ release="LCG_${release#LCG_}"   # normalize: accept LCG_110 or 110
 relnum="${release#LCG_}"        # bare number for --version-number
 [[ "$relnum" =~ ^[0-9]+[a-z]?$ ]] || { echo "lcg-view: '$release' is not an LCG release — build with --set release=LCG_<N>" >&2; exit 1; }
 postfix=""
-# LCG platform == the bits arch subtree ($ARCHITECTURE); opt/dbg already glued on.
-plat="${LCG_PLATFORM:-${ARCHITECTURE}}"
+# LCG platform == the install subtree ($EFFECTIVE_ARCHITECTURE, e.g. x86_64-el9-gcc14-opt).
+# $ARCHITECTURE is the raw host arch (x86_64-el9), which holds no packages.
+plat="${LCG_PLATFORM:-${EFFECTIVE_ARCHITECTURE:?}}"
 
 "${BITS_SCRIPT_DIR:?}/bits" overlay lcg \
-    --architecture "$ARCHITECTURE" \
+    --architecture "$EFFECTIVE_ARCHITECTURE" \
     --work-dir "${WORK_DIR:-${BITS_WORK_DIR:-$PWD}}" \
     --platform "$plat" \
     --version-number "$relnum" \
