@@ -3,21 +3,16 @@ version: v1
 
 # LHCb group overlay — compose with:  --defaults lhcb[::gcc14]
 #
-# Adds only LHCb-specific policy on top of the shared stacks.bits defaults
-# (build env, source/sandbox policy, and the lcg.bits externals provider): the
-# LHCb CVMFS namespace/layout, the LHCb package families, and the LHCb project
-# version pins. lhcb.bits drops its own defaults-release.sh and inherits the
-# shared one from stacks.bits, so LHCb builds against the same reusable LCG
-# externals base as every other stack. stacks.bits -> lcg.bits is LHCb's ONLY
-# external-provider dependency; the residual common.bits references in the
-# project recipes (gaudi, ...) are being migrated onto the lcg.bits base.
+# Adds only LHCb policy on top of the shared stacks.bits base: the LHCb CVMFS
+# namespace/layout and the LHCb version pins. No env: and no package_family —
+# both are hashed, and inheriting them unchanged keeps every untouched LCG
+# external reusable across stacks.
+#
+# The release comes from the command line (--set release=LCG_110); `main` is
+# only the default. Same rule in every stacks.bits-based overlay.
 
-env:
-  CFLAGS: -fPIC -O2
-  CMAKE_BUILD_TYPE: RELWITHDEBINFO
-  CXXFLAGS: -fPIC -O2 -std=c++20
-  CXXSTD: '20'
-  MACOSX_DEPLOYMENT_TARGET: '14.0'
+variables:
+  release: "main"
 
 requires:
   - stacks.bits
@@ -36,19 +31,11 @@ system:
   cvmfs_modules_template:     "{prefix}/{release}/{platform}/Modules/modulefiles/{pkg}"
   cvmfs_shared_path_template: "{prefix}/{release}/noarch/{pkg}/{tag}"
 
-package_family:
-  default: externals
-  lcg:
-    - ROOT
-  lhcb:
-    - Gaudi
-
 overrides:
-  # Build lcg.bits at the selected release branch (--flavour release=<X>, e.g.
-  # LCG_110). Must be in this configDir overlay: the provider is cloned on the
-  # early path before stacks.bits' defaults-release is applied, so the override
-  # has to be here (mirrors defaults-atlas.sh).
+  # Recipe pool and policy layer at the branch named by `release`.
   lcg.bits:
+    tag: "%(release)s"
+  stacks.bits:
     tag: "%(release)s"
 
   # --- LHCb externals deltas vs the LCG_110 base (from heptools-dev4lhcb) ---

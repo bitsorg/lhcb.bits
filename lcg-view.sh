@@ -41,7 +41,11 @@ MODULE_OPTIONS="--none"   # env-only; carries LCG_RELEASE_BASE/LCG_PLATFORM to d
 # its symlinks are build-time-relative, so it is left out of the release path.
 #
 # Release LABEL from the build-wide flavour (same value version_from used above).
-release="${release:?lcg-view: 'release' flavour not set — build with --set release=LCG_<N>}"
+# The resolved release: version_from sets PKGVERSION to it however it was chosen.
+release="${PKGVERSION:?}"
+case "$release" in main|master|HEAD)
+  echo "lcg-view: needs an LCG release — build with --set release=LCG_<N>" >&2; exit 1 ;;
+esac
 release="LCG_${release#LCG_}"   # normalize: accept LCG_110 or 110
 relnum="${release#LCG_}"        # bare number for --version-number
 postfix=""
