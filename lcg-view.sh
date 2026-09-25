@@ -40,14 +40,11 @@ MODULE_OPTIONS="--none"   # env-only; carries LCG_RELEASE_BASE/LCG_PLATFORM to d
 # Building it here (bits overlay lcg --build-view) is available for local demos but
 # its symlinks are build-time-relative, so it is left out of the release path.
 #
-# Release LABEL from the build-wide flavour (same value version_from used above).
 # The resolved release: version_from sets PKGVERSION to it however it was chosen.
 release="${PKGVERSION:?}"
-case "$release" in main|master|HEAD)
-  echo "lcg-view: needs an LCG release — build with --set release=LCG_<N>" >&2; exit 1 ;;
-esac
 release="LCG_${release#LCG_}"   # normalize: accept LCG_110 or 110
 relnum="${release#LCG_}"        # bare number for --version-number
+[[ "$relnum" =~ ^[0-9]+[a-z]?$ ]] || { echo "lcg-view: '$release' is not an LCG release — build with --set release=LCG_<N>" >&2; exit 1; }
 postfix=""
 # LCG platform == the bits arch subtree ($ARCHITECTURE); opt/dbg already glued on.
 plat="${LCG_PLATFORM:-${ARCHITECTURE}}"
