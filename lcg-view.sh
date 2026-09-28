@@ -1,5 +1,9 @@
 package: lcg-view
-description: LHCb LCG externals manifest (LCG_externals_<platform>.txt) over the bits LCG closure, so LbDevTools' toolchain resolves against bits-built packages. Top of the LCG closure (requires lcg-externals) → built last, shares the release build_id; the merged view itself is the release view published by `bits publish --release-view` and reused by `bits enter --view`.
+description: LHCb toolchain and LCG externals manifest over the bits LCG closure
+# Writes LCG_externals_<platform>.txt so LbDevTools' toolchain resolves against the
+# bits-built packages. Top of the LCG closure (requires lcg-externals), so it is built
+# last and shares the release build_id; the merged view itself is the release view
+# published by `bits publish --release-view` and reused by `bits enter --view`.
 # Versioned by LCG release: version_from: release takes version/tag/commit_hash
 # from the build-wide `release` variable (--set release=LCG_<N>) — same value that
 # drives defaults-lhcb's `lcg.bits: tag` and the CVMFS {release} slot.
