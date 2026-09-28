@@ -128,7 +128,7 @@ def fill(tmpl, e):
     return tmpl
 
 def template(e, tm):
-    t = (tm.get("shared") or tm.get("path")) if e["arch"] == "shared" else tm.get("path")
+    t = (tm.get("shared") or tm.get("path")) if e["arch"] in ("share", "shared") else tm.get("path")
     if not t:
         sys.exit("lcg-view: %s has no CVMFS template" % e["pkg"])
     return t
