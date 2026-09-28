@@ -111,10 +111,10 @@ PY
 # only known then, so derive it from this package's own final path and template.
 cat > "$INSTALLROOT/etc/lcg-view/cvmfs-manifest.py" <<\PY
 # lcg-view: rewrite the manifest dirs to the packages' CVMFS publish paths, as
-# bits cvmfs publish computes them: each package's own template (release baked
-# in), with the run's context (prefix, platform, install_dir, user) recovered by
-# matching INSTALL_BASE against this package's own template. Assumes the run
-# publishes every package under one root (the community --prefix-fallback).
+# bits cvmfs publish computes them: the publishing build's templates
+# (BITS_CVMFS_TEMPLATES, release baked in) for every package, or each package's
+# own when unset (older bits). The run's context (prefix, platform, install_dir,
+# user) is recovered by matching INSTALL_BASE against this package's template.
 import json, os, re, sys
 root = os.path.join(os.environ["WORK_DIR"], os.environ["PP"])
 base = os.environ["INSTALL_BASE"].rstrip("/")
@@ -123,11 +123,12 @@ with open(os.path.join(root, ".meta.json")) as fh:
 with open(os.path.join(root, "etc/lcg-view/entries.json")) as fh:
     entries = json.load(fh)
 CONTEXT = {"prefix": ".+", "platform": "[^/]*", "install_dir": "[^/]*", "user": "[^/]*"}
+run = json.loads(os.environ.get("BITS_CVMFS_TEMPLATES") or "{}")
 
 def fill(tmpl, e):
     fam = e["family"] + "/" if e["family"] else ""
     for k, v in (("pkg", e["pkg"]), ("tag", e["tag"]), ("version", e["version"]),
-                 ("revision", e["revision"]), ("family", fam)):
+                 ("revision", e["revision"]), ("family", fam), ("arch", e["arch"])):
         tmpl = tmpl.replace("{%s}" % k, v)
     return tmpl
 
@@ -139,9 +140,10 @@ def template(e, tm):
 
 pkg = meta["package"]
 rev = str(pkg.get("revision") or "")
-me = {"pkg": pkg["name"], "version": pkg["version"], "revision": rev, "arch": "",
+me = {"pkg": pkg["name"], "version": pkg["version"], "revision": rev,
+      "arch": pkg.get("effective_architecture") or meta.get("architecture") or "",
       "tag": pkg["version"] + ("-" + rev if rev else ""), "family": pkg.get("pkg_family") or ""}
-pattern = fill(template(me, meta.get("cvmfs_templates") or {}), me)
+pattern = fill(template(me, run or meta.get("cvmfs_templates") or {}), me)
 rx, pos, seen = "", 0, set()
 for m in re.finditer(r"\{(\w+)\}", pattern):
     name = m.group(1)
@@ -159,7 +161,7 @@ context = m.groupdict()
 
 lines = []
 for e in entries:
-    d = fill(template(e, e["templates"]), e)
+    d = fill(template(e, run or e["templates"]), e)
     for k, v in context.items():
         d = d.replace("{%s}" % k, v)
     if re.search(r"\{\w+\}", d):

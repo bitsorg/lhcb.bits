@@ -27,9 +27,14 @@ system:
   # match it (kept in sync by bits-admin PR) or an injected build refuses to publish.
   prefix:                     "/cvmfs/bits.cern.ch/lhcb/releases"
   cvmfs_user_prefix:          "/cvmfs/bits.cern.ch/lhcb/user"  # sibling of releases, not {prefix}/user
-  cvmfs_releases_template:    "{prefix}/{release}/{pkg}/{tag}/{platform}"
-  cvmfs_modules_template:     "{prefix}/{release}/{platform}/Modules/modulefiles/{pkg}"
-  cvmfs_shared_path_template: "{prefix}/{release}/noarch/{pkg}/{tag}"
+  # LCG-style: <release>/<pkg>/<version>/<arch>. {arch} is the build arch
+  # (x86_64-el9-gcc14-opt), so gcc13/gcc15/dbg builds do not collide; {version}
+  # has no bits revision, so within one release a rebuilt package of the same
+  # version conflicts with the published one (as in LCG); replacing it needs
+  # PREPUB_REPLACE_ON_CONFLICT in bits-console.
+  cvmfs_releases_template:    "{prefix}/{release}/{pkg}/{version}/{arch}"
+  cvmfs_modules_template:     "{prefix}/{release}/{arch}/Modules/modulefiles/{pkg}"
+  cvmfs_shared_path_template: "{prefix}/{release}/noarch/{pkg}/{version}"
 
 overrides:
   # Recipe pool and policy layer at the branch named by `release`.
