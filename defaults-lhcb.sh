@@ -54,6 +54,9 @@ overrides:
   DD4hep:
     version: "v01-36"
     tag: "v01-36"
+    # The source mirror names this release 01.36, not v01-36 (as the recipe's URL assumes).
+    sources:
+      - https://lcgpackages.web.cern.ch/tarFiles/sources/DD4hep-01.36.tar.gz
 
   # LHCb-patched generators (.lhcb arms in lcg.bits, version-gated). Same upstream
   # tarball as the base/.atlas build; only the source patch differs.
