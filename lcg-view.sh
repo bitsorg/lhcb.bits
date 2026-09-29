@@ -133,7 +133,10 @@ def fill(tmpl, e):
     return tmpl
 
 def template(e, tm):
-    t = (tm.get("shared") or tm.get("path")) if e["arch"] in ("share", "shared") else tm.get("path")
+    # A packages template is where the package trees are; "path" is then only
+    # the release view.
+    tree = tm.get("packages") or tm.get("path")
+    t = (tm.get("shared") or tree) if e["arch"] in ("share", "shared") else tree
     if not t:
         sys.exit("lcg-view: %s has no CVMFS template" % e["pkg"])
     return t
