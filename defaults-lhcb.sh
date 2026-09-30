@@ -22,19 +22,23 @@ requires:
 # stacks.bits — so lhcb.bits can drop its own defaults-release.sh while still
 # publishing into the LHCb tree with LHCb's path templates.
 system:
-  # {prefix} is the releases ROOT (auth boundary). bits-console (ui-config.yaml:
+  # {prefix} is the group ROOT (auth boundary). bits-console (ui-config.yaml:
   # cvmfs_prefix) injects the authoritative value, which WINS; the value below MUST
   # match it (kept in sync by bits-admin PR) or an injected build refuses to publish.
-  prefix:                     "/cvmfs/bits.cern.ch/lhcb/releases"
-  cvmfs_user_prefix:          "/cvmfs/bits.cern.ch/lhcb/user"  # sibling of releases, not {prefix}/user
-  # LCG-style: <release>/<pkg>/<version>/<arch>. {arch} is the build arch
-  # (x86_64-el9-gcc14-opt), so gcc13/gcc15/dbg builds do not collide; {version}
-  # has no bits revision, so within one release a rebuilt package of the same
-  # version conflicts with the published one (as in LCG); replacing it needs
-  # PREPUB_REPLACE_ON_CONFLICT in bits-console.
-  cvmfs_releases_template:    "{prefix}/{release}/{pkg}/{version}/{arch}"
-  cvmfs_modules_template:     "{prefix}/{release}/{arch}/Modules/modulefiles/{pkg}"
-  cvmfs_shared_path_template: "{prefix}/{release}/noarch/{pkg}/{version}"
+  prefix:                     "/cvmfs/bits.cern.ch/lhcb"
+  cvmfs_user_prefix:          "{prefix}/user"
+  # Layout (as key4hep.bits): packages are published ONCE per build arch under
+  # {prefix}/{arch}/Packages/<pkg>/<version-revision>, modulefiles beside them;
+  # an unchanged package is not sent again. A release is a view of symlinks to
+  # them, releases/<release>/[<family>/]<pkg>/<version>/<arch>, plus a merged
+  # view at views/<release>/<arch>; both are made only when asked for
+  # (bits cvmfs publish --release-view / console option). {arch} is the build
+  # arch (x86_64-el9-gcc14-opt), so compilers/build types never collide.
+  cvmfs_packages_template:    "{prefix}/{arch}/Packages/{pkg}/{tag}"
+  cvmfs_modules_template:     "{prefix}/{arch}/Modules/modulefiles/{pkg}"
+  cvmfs_shared_path_template: "{prefix}/noarch/{pkg}/{tag}"
+  cvmfs_releases_template:    "{prefix}/releases/{release}/{family}{pkg}/{version}/{arch}"
+  cvmfs_views_template:       "{prefix}/views/{release}/{arch}"
 
 overrides:
   # Recipe pool and policy layer at the branch named by `release`.
