@@ -85,7 +85,7 @@ as usual, in native mode (`useDocker false`), not in its Docker container.
 
 | File | Role |
 |---|---|
-| `defaults-lhcb.sh` | LHCb overlay on the stacks.bits base: LHCb CVMFS layout, LHCb pins against the LCG base (ROOT 6.36.04, Boost 1.89.0, DD4hep v01-36 built minimal, LHCb generator variants), tags for Gaudi, Detector, LHCb, Lbcom, Rec and Allen, and Geant4, LCIO and EDM4hep disabled. |
+| `defaults-lhcb.sh` | LHCb overlay on the stacks.bits base: LHCb CVMFS layout, LHCb pins against the LCG base (ROOT 6.36.04, Boost 1.89.0, DD4hep v01-36 built minimal, LHCb generator variants), tags for Gaudi, Detector, LHCb and Lbcom, and Geant4, LCIO and EDM4hep disabled. |
 | `lcg-externals.sh` | Meta-package: LHCb's top-level LCG externals. |
 | `lcg-view.sh` | Top of the externals build: writes `LCG_externals_<platform>.txt` and the LHCb toolchain `lcg-toolchains/LCG_<N>/<platform>.cmake` (plus an `x86_64_v3` variant). |
 | `setupLHCb.sh` | Points LbEnv / lb-stack-setup at the bits-built `lcg-view`. |

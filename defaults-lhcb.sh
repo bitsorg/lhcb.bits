@@ -95,10 +95,6 @@ overrides:
     tag: "v58r8"
   Lbcom:
     tag: "v38r8"
-  Rec:
-    tag: "v39r8"
-  Allen:
-    tag: "v7r8"
 
 # LHCb DD4hep is built minimal (ROOT/XercesC geometry only), like lcgcmake's
 # heptools-lhcbsetup. Disabling these backends prunes them from DD4hep's requires

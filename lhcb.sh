@@ -29,10 +29,6 @@ requires:
   - boost
   - Python-modules
   - ROOT
-  
-overrides:
-  ROOT:
-    tag: "v40r2"
 
 #-- Could NOT find FieldMap (missing: FieldMap_ROOT_DIR)
 #-- Could NOT find ParamFiles (missing: ParamFiles_ROOT_DIR)
