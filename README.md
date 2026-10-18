@@ -24,6 +24,9 @@ named by the LCG release you build (for example `LCG_110`). The files are listed
   `x86_64-ubuntu2404` and `x86_64-ubuntu2604`.
 - The compiler is chosen with a stacks.bits compiler defaults; the LHCb pins are set for
   LCG_110 with `gcc14`. The build type is `opt` or `dbg`.
+- An EL9 host for a native build. Elsewhere, build and use the stack in an EL9 container,
+  e.g. `gitlab-registry.cern.ch/lhcb-docker/os-base/alma9-devel` with the OS package
+  `zlib-devel` added (lb-stack-setup's own `el9-build` image is not public).
 - To build LHCb projects against the result: `/cvmfs/lhcb.cern.ch` for LbEnv and for the
   LHCb `lcg-toolchains` fragments (or set `LCG_TOOLCHAINS_DIR`), and
   [lb-stack-setup](https://gitlab.cern.ch/lhcb-core/dev-tools/lb-stack-setup) or
@@ -51,9 +54,12 @@ the manifest and toolchain, build `lcg-externals` instead.
 
 ### Building LHCb software against the result
 
-After the usual LbEnv setup, source `setupLHCb.sh` from this repository. It finds
-`sw/<arch>/lcg-view/latest`, sets `BINARY_TAG`, `LCG_VERSION`, `LCG_RELEASE_BASE` and
-`CMAKE_PREFIX_PATH`, and prints the matching lb-stack-setup settings:
+After the usual LbEnv setup, source `setupLHCb.sh` from this repository. It takes
+`sw/<arch>/lcg-view/latest`, or when nothing is built there the newest `lcg-view` published
+under the `prefix:` of `cvmfs.yaml` (`/cvmfs/bits.cern.ch/lhcb/<arch>/Packages/lcg-view`).
+It sets `BINARY_TAG`, `LCG_VERSION`, `LCG_RELEASE_BASE` and `CMAKE_PREFIX_PATH`, without
+LbEnv's `/cvmfs/lhcb.cern.ch/lib/lcg` and `lib/contrib` (they would supply whatever the
+view lacks), and prints the lcg-view's real path and the matching lb-stack-setup settings:
 
 ```bash
 source /cvmfs/lhcb.cern.ch/lib/LbEnv
@@ -61,8 +67,9 @@ source setupLHCb.sh                   # optional argument: a BINARY_TAG from the
 ```
 
 `BINARY_TAG` defaults to the `x86_64_v3` variant when the CPU supports it. If the work
-directory is not `sw/` in this repository, or holds more than one `lcg-view`, set `BITS_SW`
-and `BITS_ARCH` (e.g. `x86_64-el9-gcc14-opt`). Then build with LbDevTools or lb-stack-setup
+directory is not `sw/` in this repository, or there is more than one `lcg-view`, set `BITS_SW`
+and `BITS_ARCH` (e.g. `x86_64-el9-gcc14-opt`); `BITS_CVMFS_PREFIX` sets another CVMFS
+prefix, and empty never uses CVMFS. Then build with LbDevTools or lb-stack-setup
 as usual, in native mode (`useDocker false`), not in its Docker container.
 
 ## Notes for LHCb users
@@ -88,7 +95,7 @@ as usual, in native mode (`useDocker false`), not in its Docker container.
 | `defaults-lhcb.sh` | LHCb overlay on the stacks.bits base: LHCb CVMFS layout, LHCb pins against the LCG base (ROOT 6.36.04, Boost 1.89.0, DD4hep v01-36 built minimal, LHCb generator variants), tags for Gaudi, Detector, LHCb and Lbcom, and Geant4, LCIO and EDM4hep disabled. |
 | `lcg-externals.sh` | Meta-package: LHCb's top-level LCG externals. |
 | `lcg-view.sh` | Top of the externals build: writes `LCG_externals_<platform>.txt` and the LHCb toolchain `lcg-toolchains/LCG_<N>/<platform>.cmake` (plus an `x86_64_v3` variant). |
-| `setupLHCb.sh` | Points LbEnv / lb-stack-setup at the bits-built `lcg-view`. |
+| `setupLHCb.sh` | Points LbEnv / lb-stack-setup at the bits-built `lcg-view`, local or on CVMFS. |
 | `gaudi.sh`, `detector.sh`, `lhcb.sh`, `lbcom.sh`, `simple_conddb_cxx.sh` | Recipes for the LHCb projects themselves. Work in progress; build the projects with lb-stack-setup (below). |
 
 ## More information
