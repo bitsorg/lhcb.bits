@@ -45,6 +45,7 @@ requires:
   - jsonmcpp
   - lhapdf
   - libgit2
+  - libsodium         # Rec; was taken from /cvmfs/lhcb.cern.ch
   - libunwind
   - libxml2
   - lxml
@@ -72,6 +73,7 @@ requires:
   - rangev3
   - rivet
   - ruamel_yaml
+  - simple_conddb_cxx # LHCb; was taken from /cvmfs/lhcb.cern.ch
   - six
   - sortedcontainers
   - spdlog

@@ -22,8 +22,9 @@ named by the LCG release you build (for example `LCG_110`). The files are listed
   detected name (`slc9_x86-64` on EL9). The other architectures bits-console offers for
   LHCb are `x86_64-el8`, `x86_64-el10`, `aarch64-el9`, `x86_64-ubuntu2204`,
   `x86_64-ubuntu2404` and `x86_64-ubuntu2604`.
-- The compiler is chosen with a stacks.bits compiler defaults; the LHCb pins are set for
-  LCG_110 with `gcc14`. The build type is `opt` or `dbg`.
+- The compiler is chosen with a stacks.bits compiler defaults (e.g. `gcc14`, `gcc15`); the build
+  type is `opt` or `dbg`. The externals' versions are LHCb's (see
+  [LHCb versions](#lhcb-versions)), the same for every compiler.
 - An EL9 host for a native build. Elsewhere, build and use the stack in an EL9 container,
   e.g. `gitlab-registry.cern.ch/lhcb-docker/os-base/alma9-devel` with the OS package
   `zlib-devel` added (lb-stack-setup's own `el9-build` image is not public).
@@ -72,17 +73,43 @@ and `BITS_ARCH` (e.g. `x86_64-el9-gcc14-opt`); `BITS_CVMFS_PREFIX` sets another 
 prefix, and empty never uses CVMFS. Then build with LbDevTools or lb-stack-setup
 as usual, in native mode (`useDocker false`), not in its Docker container.
 
+## LHCb versions
+
+The externals are built at the versions of LHCb's own LCG flavour (now `LCG_108c`
+`LHCB_11`), not those of the LCG release the recipes come from. `defaults-lhcb.sh` carries
+them as overrides, generated between two marker lines by `tools/lcg-deltas.py` from
+LHCb's [lcg-toolchains](https://gitlab.cern.ch/lhcb-core/lcg-toolchains); entries written by
+hand outside the markers win (the LHCb projects, the LHCb generator variants). To move to
+another flavour, regenerate:
+
+```bash
+git clone https://gitlab.cern.ch/lhcb-core/lcg-toolchains.git ../lcg-toolchains
+bits status --json --architecture x86_64-el9 --defaults lhcb::gcc14::opt \
+    --set release=LCG_110 lcg-externals > /tmp/closure.json    # bits with status --set
+tools/lcg-deltas.py --lcginfo ../lcg-toolchains/LCG_108c/lcginfo.json --flavour LHCB_11 \
+    --platform x86_64-el9-gcc15-opt --recipes ../lcg.bits --closure /tmp/closure.json \
+    --check-urls --write
+```
+
+`--recipes` is an lcg.bits checkout at the release branch (`LCG_110`). `--closure` limits the
+overrides to what `lcg-externals` builds; `--check-urls` checks each new source tarball
+exists. Without `--write` the block is printed. The script reports what it leaves alone: LCG
+packages with no lcg.bits recipe or outside the closure, overrides written by hand that
+differ from LCG, and packages kept at the lcg.bits version because its patches are for that
+version or LHCb's is a patched build (`3.3.1.lhcb1`) lcg.bits has no patch for. It exits 1
+when a tag or source does not follow the version: that needs an override by hand.
+
 ## Notes for LHCb users
 
 - **Releases.** The release comes from the command line; the default `main` follows the
-  main branches of lcg.bits and stacks.bits. The LHCb pins in `defaults-lhcb.sh` are deltas
-  against the LCG_110 base.
+  main branches of lcg.bits and stacks.bits. The versions are LHCb's in any case
+  ([LHCb versions](#lhcb-versions)).
 - **CVMFS layout.** Builds publish under `/cvmfs/bits.cern.ch/lhcb` with the shared
   [stacks.bits layout](https://github.com/bitsorg/stacks.bits#cvmfs-layout); only the
   prefix differs. When `lcg-view` is published, its manifest is rewritten to the published
   package paths.
 - **Publishing** is done from [bits-console](https://gitlab.cern.ch/buncic/bits-console).
-  The prefix `/cvmfs/bits.cern.ch/lhcb` in `defaults-lhcb.sh` must match the `cvmfs_prefix`
+  The prefix `/cvmfs/bits.cern.ch/lhcb` in `cvmfs.yaml` must match the `cvmfs_prefix`
   bits-console sets for LHCb; a build whose prefix disagrees refuses to publish.
 - **Developing a package.** Inside this repository, `bits init -c . <pkg>` makes a writable
   checkout that the next `bits build` uses; see the
@@ -92,7 +119,8 @@ as usual, in native mode (`useDocker false`), not in its Docker container.
 
 | File | Role |
 |---|---|
-| `defaults-lhcb.sh` | LHCb overlay on the stacks.bits base: LHCb CVMFS layout, LHCb pins against the LCG base (ROOT 6.36.04, Boost 1.89.0, DD4hep v01-36 built minimal, LHCb generator variants), tags for Gaudi, Detector, LHCb and Lbcom, and Geant4, LCIO and EDM4hep disabled. |
+| `defaults-lhcb.sh` | LHCb overlay on the stacks.bits base: the versions of LHCb's LCG flavour (generated), LHCb generator variants, tags for Gaudi, Detector, LHCb and Lbcom, and DD4hep built minimal (Geant4, LCIO and EDM4hep disabled). The CVMFS layout is in `cvmfs.yaml`. |
+| `tools/lcg-deltas.py` | Writes the version overrides of `defaults-lhcb.sh` from LHCb's `lcg-toolchains` ([LHCb versions](#lhcb-versions)). |
 | `lcg-externals.sh` | Meta-package: LHCb's top-level LCG externals. |
 | `lcg-view.sh` | Top of the externals build: writes `LCG_externals_<platform>.txt` and the LHCb toolchain `lcg-toolchains/LCG_<N>/<platform>.cmake` (plus an `x86_64_v3` variant). |
 | `setupLHCb.sh` | Points LbEnv / lb-stack-setup at the bits-built `lcg-view`, local or on CVMFS. |
