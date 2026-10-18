@@ -17,28 +17,7 @@ variables:
 requires:
   - stacks.bits
 
-# LHCb CVMFS namespace + layout (system: is NOT hashed, so it never affects
-# artifact reuse). Kept here — overriding the templates inherited from
-# stacks.bits — so lhcb.bits can drop its own defaults-release.sh while still
-# publishing into the LHCb tree with LHCb's path templates.
-system:
-  # {prefix} is the group ROOT (auth boundary). bits-console (ui-config.yaml:
-  # cvmfs_prefix) injects the authoritative value, which WINS; the value below MUST
-  # match it (kept in sync by bits-admin PR) or an injected build refuses to publish.
-  prefix:                     "/cvmfs/bits.cern.ch/lhcb"
-  cvmfs_user_prefix:          "{prefix}/user"
-  # Layout (as key4hep.bits): packages are published ONCE per build arch under
-  # {prefix}/{arch}/Packages/<pkg>/<version-revision>, modulefiles beside them;
-  # an unchanged package is not sent again. A release is a view of symlinks to
-  # them, releases/<release>/[<family>/]<pkg>/<version>/<arch>, plus a merged
-  # view at views/<release>/<arch>; both are made only when asked for
-  # (bits cvmfs publish --release-view / console option). {arch} is the build
-  # arch (x86_64-el9-gcc14-opt), so compilers/build types never collide.
-  cvmfs_packages_template:    "{prefix}/{arch}/Packages/{pkg}/{tag}"
-  cvmfs_modules_template:     "{prefix}/{arch}/Modules/modulefiles/{pkg}"
-  cvmfs_shared_path_template: "{prefix}/noarch/{pkg}/{tag}"
-  cvmfs_releases_template:    "{prefix}/releases/{release}/{family}{pkg}/{version}/{arch}"
-  cvmfs_views_template:       "{prefix}/views/{release}/{arch}"
+# The LHCb CVMFS namespace and layout are in cvmfs.yaml.
 
 overrides:
   # Recipe pool and policy layer at the branch named by `release`.
