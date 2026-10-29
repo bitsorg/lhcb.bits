@@ -14,18 +14,26 @@ named by the LCG release you build (for example `LCG_110`). The files are listed
 
 ## Prerequisites
 
-- bits installed as described in the
-  [bits README](https://github.com/bitsorg/bits#installation); check the machine with
-  `bits doctor`.
-- Build with the architecture `x86_64-el9`, so the install directories and the toolchain
-  are named like LHCb platforms (`x86_64-el9-gcc14-opt`). Without it bits uses the
-  detected name (`slc9_x86-64` on EL9). The other architectures bits-console offers for
-  LHCb are `x86_64-el8`, `x86_64-el10`, `aarch64-el9`, `x86_64-ubuntu2204`,
-  `x86_64-ubuntu2404` and `x86_64-ubuntu2604`.
-- The compiler is chosen with a stacks.bits compiler defaults (e.g. `gcc14`, `gcc15`); the build
-  type is `opt` or `dbg`. The externals' versions are LHCb's (see
-  [LHCb versions](#lhcb-versions)), the same for every compiler.
-- An EL9 host for a native build. Elsewhere, build and use the stack in an EL9 container,
+- bits, and one of two setups (see [Installation &
+  Prerequisites](https://github.com/bitsorg/bits/blob/main/docs/USERGUIDE.md#2-installation--prerequisites)
+  in the bits user guide; `bits doctor` checks the machine):
+  - docker or rootless podman, to build in the platform's builder image with `--docker`
+    (recommended, and the only way to reuse what the LHCb CI built);
+  - or the system packages listed in [Building
+    natively](https://github.com/bitsorg/bits/blob/main/docs/USERGUIDE.md#building-natively-what-to-install),
+    to build with this machine's compilers and libraries.
+- A platform the LHCb CI builds, so that its binaries are reused: `x86_64-el8`,
+  `x86_64-el9`, `x86_64-el10`, `aarch64-el9`, `x86_64-ubuntu2204`, `x86_64-ubuntu2404` and
+  `x86_64-ubuntu2604`. Pass it as `--architecture`: by itself bits names a machine after
+  its OS (an EL9 machine `slc9_x86-64`), which is not one of them. See [Finding a platform
+  with pre-built
+  binaries](https://github.com/bitsorg/bits/blob/main/docs/USERGUIDE.md#finding-a-platform-with-pre-built-binaries).
+- `x86_64-el9` also names the install directories and the toolchain like LHCb platforms
+  (`x86_64-el9-gcc14-opt`).
+- The compiler is chosen with a stacks.bits compiler defaults (e.g. `gcc14`, `gcc15`); the
+  build type is `opt` or `dbg`. The externals' versions are LHCb's (see [LHCb
+  versions](#lhcb-versions)), the same for every compiler.
+- To use the result with the LHCb tools on a machine that is not EL9, an EL9 container,
   e.g. `gitlab-registry.cern.ch/lhcb-docker/os-base/alma9-devel` with the OS package
   `zlib-devel` added (lb-stack-setup's own `el9-build` image is not public).
 - To build LHCb projects against the result: `/cvmfs/lhcb.cern.ch` for LbEnv and for the
@@ -37,15 +45,17 @@ named by the LCG release you build (for example `LCG_110`). The files are listed
 
 ```bash
 bits init lhcb.bits && cd lhcb.bits     # or: git clone https://github.com/bitsorg/lhcb.bits
-bits use build --architecture x86_64-el9 --defaults lhcb::gcc14::opt --set release=LCG_110
+bits use build --docker --architecture x86_64-el9 --defaults lhcb::gcc14::opt --set release=LCG_110
 bits build --dry-run lcg-view           # optional: what would be reused and what built
 bits build lcg-view                     # all LHCb externals, then the manifest and toolchain
 bits enter lcg-view/latest              # sub-shell with the externals loaded; leave with `exit`
 ```
 
-`bits use build` records the options once for this directory (saved in `./.bitsuse`); add
-`--docker` to it to build in the bits container image for the architecture. To build
-elsewhere, `export BITS_WORK_DIR=/path/to/sw`.
+`bits use build` records the options once for this directory (saved in `./.bitsuse`).
+`--docker` builds in the platform's builder image; on a machine of the same platform `bits
+enter` then works here. Without it, bits builds with this machine's compilers and system
+packages, and reuses nothing the CI built. To build elsewhere, `export
+BITS_WORK_DIR=/path/to/sw`.
 
 `--defaults lhcb::gcc14::opt` loads the stacks.bits `release` base, this repository's
 `lhcb` overlay, and the stacks.bits `gcc14` and `opt` profiles. `--set release=LCG_110`
