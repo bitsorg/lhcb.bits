@@ -45,17 +45,19 @@ named by the LCG release you build (for example `LCG_110`). The files are listed
 
 ```bash
 bits init lhcb.bits && cd lhcb.bits     # or: git clone https://github.com/bitsorg/lhcb.bits
-bits use build --docker --architecture x86_64-el9 --defaults lhcb::gcc14::opt --set release=LCG_110
+bits use --architecture x86_64-el9 --defaults lhcb::gcc14::opt
+bits use build --docker --set release=LCG_110
 bits build --dry-run lcg-view           # optional: what would be reused and what built
 bits build lcg-view                     # all LHCb externals, then the manifest and toolchain
 bits enter lcg-view/latest              # sub-shell with the externals loaded; leave with `exit`
 ```
 
-`bits use build` records the options once for this directory (saved in `./.bitsuse`).
-`--docker` builds in the platform's builder image; on a machine of the same platform `bits
-enter` then works here. Without it, bits builds with this machine's compilers and system
-packages, and reuses nothing the CI built. To build elsewhere, `export
-BITS_WORK_DIR=/path/to/sw`.
+`bits use` records the options once for this directory (saved in `./.bitsuse`): the
+platform and the defaults for every command, so `bits q` and `bits enter` find this build,
+the rest for `bits build`. `--docker` builds in the platform's builder image; on a machine
+of the same platform `bits enter` then works here. Without it, bits builds with this
+machine's compilers and system packages, and reuses nothing the CI built. To build
+elsewhere, `export BITS_WORK_DIR=/path/to/sw`.
 
 `--defaults lhcb::gcc14::opt` loads the stacks.bits `release` base, this repository's
 `lhcb` overlay, and the stacks.bits `gcc14` and `opt` profiles. `--set release=LCG_110`
