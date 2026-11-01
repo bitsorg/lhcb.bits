@@ -42,6 +42,56 @@ named by the LCG release you build (for example `LCG_110`). The files are listed
 
 ## Getting started
 
+### Using the published externals
+
+The LHCb externals are published on CVMFS as `lcg-view` releases (now `LCG_110` on
+`x86_64-el9`, with gcc14 and gcc15, `opt` and `dbg`), so nothing has to be built or checked
+out:
+
+```bash
+bits --community lhcb q lcg-view          # the published versions: lcg-view/LCG_110-<N>
+bits --community lhcb enter -a x86_64-el9-gcc14-opt lcg-view/<version>
+source setupLHCb.sh                       # in that sub-shell
+```
+
+`setupLHCb.sh` comes with the `lcg-view` builds made since it moved into the recipe (from
+November 2026; `LCG_110-1` and `LCG_110-2` do not have it). Outside `bits enter`, source it
+by its path,
+`/cvmfs/bits.cern.ch/lhcb/<arch>/Packages/lcg-view/<version>/bin/setupLHCb.sh`.
+
+`bits enter` opens a sub-shell set up from the release view: the externals on the paths,
+`LCG_PLATFORM` and `LCG_RELEASE_BASE` set, and `setupLHCb.sh` on `PATH`; leave it with
+`exit`. `setupLHCb.sh` sources LbEnv (`/cvmfs/lhcb.cern.ch/lib/LbEnv`) when `lb-run` is not found yet, then sets `BINARY_TAG`,
+`LCG_VERSION`, `LCG_RELEASE_BASE` and `CMAKE_PREFIX_PATH`, without LbEnv's
+`/cvmfs/lhcb.cern.ch/lib/lcg` and `lib/contrib` (they would supply whatever the view lacks),
+and prints the lb-stack-setup settings. `BINARY_TAG` is the `x86_64_v3` variant when the
+CPU supports it; another one of the view's toolchains can be given as its argument
+(`source setupLHCb.sh x86_64-el9-gcc14-opt`).
+
+### Building Gaudi and the LHCb projects
+
+In the same sub-shell, with [lb-stack-setup](https://gitlab.cern.ch/lhcb-core/dev-tools/lb-stack-setup)
+installed as its README describes, apply the settings `setupLHCb.sh` printed and build in
+native mode, not in its Docker container:
+
+```bash
+cd /path/to/stack
+utils/config.py binaryTag <as printed>
+utils/config.py lcgVersion <as printed>
+utils/config.py cmakePrefixPath '<as printed>'
+utils/config.py useDocker false
+make Gaudi
+```
+
+The settings stay in the stack directory: later it is only `bits enter`, `source
+setupLHCb.sh` and `make`. lb-stack-setup checks out the projects' default branches; the
+versions this repository pins (e.g. Gaudi `v40r2`, in `defaults-lhcb.sh`) are the ones
+built against these externals. LbDevTools works the same way after `source setupLHCb.sh`.
+
+### Building the externals yourself
+
+Only to change the externals, in a checkout of this repository:
+
 ```bash
 bits init lhcb.bits && cd lhcb.bits     # or: git clone https://github.com/bitsorg/lhcb.bits
 bits use --architecture x86_64-el9 --defaults lhcb::gcc14::opt
@@ -49,40 +99,21 @@ bits use build --docker --set release=LCG_110
 bits build --dry-run lcg-view           # optional: what would be reused and what built
 bits build lcg-view                     # all LHCb externals, then the manifest and toolchain
 bits enter lcg-view/latest              # sub-shell with the externals loaded; leave with `exit`
+source setupLHCb.sh                     # then as above
 ```
 
 `bits use` records the options once for this directory (saved in `./.bitsuse`): the
 platform and the defaults for every command, so `bits q` and `bits enter` find this build,
-the rest for `bits build`. `--docker` builds in the platform's builder image; on a machine
-of the same platform `bits enter` then works here. Without it, bits builds with this
-machine's compilers and system packages, and reuses nothing the CI built. To build
-elsewhere, `export BITS_WORK_DIR=/path/to/sw`.
+the rest for `bits build`. `--docker` builds in the platform's builder image, and reuses
+what the CI built; on a machine of the same platform `bits enter` then works here. Without
+it, bits builds with this machine's compilers and system packages, and reuses nothing the
+CI built. To build elsewhere, `export BITS_WORK_DIR=/path/to/sw`.
 
 `--defaults lhcb::gcc14::opt` loads the stacks.bits `release` base, this repository's
 `lhcb` overlay, and the stacks.bits `gcc14` and `opt` profiles. `--set release=LCG_110`
 selects the `LCG_110` branches of lcg.bits and stacks.bits and versions `lcg-view`;
 `lcg-view` refuses a value that is not an LCG release. To build only the externals, without
 the manifest and toolchain, build `lcg-externals` instead.
-
-### Building LHCb software against the result
-
-After the usual LbEnv setup, source `setupLHCb.sh` from this repository. It takes
-`sw/<arch>/lcg-view/latest`, or when nothing is built there the newest `lcg-view` published
-under the `prefix:` of `cvmfs.yaml` (`/cvmfs/bits.cern.ch/lhcb/<arch>/Packages/lcg-view`).
-It sets `BINARY_TAG`, `LCG_VERSION`, `LCG_RELEASE_BASE` and `CMAKE_PREFIX_PATH`, without
-LbEnv's `/cvmfs/lhcb.cern.ch/lib/lcg` and `lib/contrib` (they would supply whatever the
-view lacks), and prints the lcg-view's real path and the matching lb-stack-setup settings:
-
-```bash
-source /cvmfs/lhcb.cern.ch/lib/LbEnv
-source setupLHCb.sh                   # optional argument: a BINARY_TAG from the toolchain directory
-```
-
-`BINARY_TAG` defaults to the `x86_64_v3` variant when the CPU supports it. If the work
-directory is not `sw/` in this repository, or there is more than one `lcg-view`, set `BITS_SW`
-and `BITS_ARCH` (e.g. `x86_64-el9-gcc14-opt`); `BITS_CVMFS_PREFIX` sets another CVMFS
-prefix, and empty never uses CVMFS. Then build with LbDevTools or lb-stack-setup
-as usual, in native mode (`useDocker false`), not in its Docker container.
 
 ## LHCb versions
 
@@ -133,9 +164,8 @@ when a tag or source does not follow the version: that needs an override by hand
 | `defaults-lhcb.sh` | LHCb overlay on the stacks.bits base: the versions of LHCb's LCG flavour (generated), LHCb generator variants, tags for Gaudi, Detector, LHCb and Lbcom, and DD4hep built minimal (Geant4, LCIO and EDM4hep disabled). The CVMFS layout is in `cvmfs.yaml`. |
 | `tools/lcg-deltas.py` | Writes the version overrides of `defaults-lhcb.sh` from LHCb's `lcg-toolchains` ([LHCb versions](#lhcb-versions)). |
 | `lcg-externals.sh` | Meta-package: LHCb's top-level LCG externals. |
-| `lcg-view.sh` | Top of the externals build: writes `LCG_externals_<platform>.txt` and the LHCb toolchain `lcg-toolchains/LCG_<N>/<platform>.cmake` (plus an `x86_64_v3` variant). |
-| `setupLHCb.sh` | Points LbEnv / lb-stack-setup at the bits-built `lcg-view`, local or on CVMFS. |
-| `gaudi.sh`, `detector.sh`, `lhcb.sh`, `lbcom.sh`, `simple_conddb_cxx.sh` | Recipes for the LHCb projects themselves. Work in progress; build the projects with lb-stack-setup (below). |
+| `lcg-view.sh` | Top of the externals build: writes `LCG_externals_<platform>.txt`, the LHCb toolchain `lcg-toolchains/LCG_<N>/<platform>.cmake` (plus an `x86_64_v3` variant) and `bin/setupLHCb.sh`, which points LbEnv / lb-stack-setup at it. |
+| `gaudi.sh`, `detector.sh`, `lhcb.sh`, `lbcom.sh`, `simple_conddb_cxx.sh` | Recipes for the LHCb projects themselves. Work in progress; build the projects with lb-stack-setup ([Building Gaudi and the LHCb projects](#building-gaudi-and-the-lhcb-projects)). |
 
 ## More information
 
