@@ -1,74 +1,54 @@
 package: Gaudi
+description: The Gaudi event-processing framework
 version: "%(tag_basename)s"
-tag: "v40r2"
+tag: "v40r5"   # LHCb stack RTA/2026.08.30 (LCG 108c)
 source: https://gitlab.cern.ch/gaudi/Gaudi.git
 requires:
-  - "GCC-Toolchain:(?!osx)"
-  - rangev3
+  # GaudiDependencies.cmake
+  - lcg-view
   - Boost
+  - Python
   - ROOT
+  - tbb
+  - uuid
+  - zlib
+  - rangev3
   - cppgsl
   - fmt
+  - jsonmcpp
+  - AIDA
   - HepPDT
   - clhep
-  - tbb
   - XercesC
-  - CppUnit
-  - Catch2
-  - cppgsl
-  - Python
-  
 build_requires:
+  - lcg-toolchains
+  - "GCC-Toolchain:(?!osx)"
   - bits-recipe-tools
   - CMake
-  
-prefer_system: (?!slc5)
-prefer_system_check:
+  - ninja
+license: Apache-2.0
 ---
 #!/bin/bash -e
-##############################
 . $(bits-include CMakeRecipe)
-##############################
 MODULE_OPTIONS="--bin --lib --cmake"
-##############################
-
-function Prepare() {
-    rsync -av --delete --delete-excluded $SOURCEDIR/ ./
-}
 
 function Configure() {
-    mkdir build && cd build
-    export PATH=$PATH:$PYTHON_MODULES/bin
-    cmake -S .. -B . \
- 	   -DCMAKE_BUILD_TYPE=Developer \
-           -DCMAKE_INSTALL_PREFIX=$INSTALLROOT \
-	   -DCPPGSL_INCLUDE_DIR=$CPPGSL_ROOT/include \
-           -DRANGEV3_INCLUDE_DIR=$RANGEV3_ROOT/include \
-	   -DROOT_INCLUDE_DIR=$ROOTSYS/include \
-	   -DCPPUNIT_INCLUDE_DIR=$CPPUNIT_ROOT/include -DCPPUNIT_LIBRARY=$CPPUNIT_ROOT/lib/libcppunit.so \
-           -DGAUDI_USE_HEPPDT=OFF \
-           -DGAUDI_USE_AIDA=OFF \
-           -DGAUDI_USE_DOXYGEN=OFF \
-           -DGAUDI_USE_GPERFTOOLS=FALSE \
-           -DCMAKE_FIND_FRAMEWORK=LAST \
-           -DBoost_NO_BOOST_CMAKE=FALSE \
-           -DCMAKE_CXX_STANDARD=20 \
-           -DCMAKE_PREFIX_PATH="$BOOST_ROOT;$FMT_ROOT;$CATCH2_ROOT;$ROOTSYS;$CLHEP_ROOT;$RANGEV3_ROOT"
-}
-
-function Make() {
-   cmake --build . -- ${CMAKE_OPTIONS} ${JOBS:+-j$JOBS}
-}
-
-function MakeInstall() {
-   cmake --install .  ${CMAKE_OPTIONS}
+  # As lb-stack-setup builds it: the LHCb toolchain lcg-view made for the platform
+  # (its compilation_flags set the build type from it: opt, dbg, opt+g).
+  local plat=${LCG_PLATFORM:-$EFFECTIVE_ARCHITECTURE}
+  local tc=("$LCG_VIEW_ROOT"/lcg-toolchains/LCG_*/"$plat".cmake)
+  [[ -f ${tc[0]} ]] || { echo "no LHCb toolchain for $plat in $LCG_VIEW_ROOT" >&2; exit 1; }
+  cmake -S "$BITS_CMAKE_SRC" -B "$BITS_CMAKE_BUILD" -G Ninja \
+    -DCMAKE_TOOLCHAIN_FILE="${tc[0]}" \
+    -DCMAKE_INSTALL_PREFIX="$INSTALLROOT" \
+    -DBUILD_TESTING=OFF \
+    -DGAUDI_USE_DOXYGEN=OFF
 }
 
 function PostInstall() {
-cat >> "$MODULEFILE" <<EoF
-  prepend-path PYTHONPATH \$PKG_ROOT/python
-  prepend-path ROOT_INCLUDE_PATH \$PKG_ROOT/include
+  cat >> "$MODULEFILE" <<EoF
+prepend-path PYTHONPATH        \$PKG_ROOT/python
+prepend-path ROOT_INCLUDE_PATH \$PKG_ROOT/include
+prepend-path GAUDI_PLUGIN_PATH \$PKG_ROOT/lib
 EoF
 }
-
-declare -f Run

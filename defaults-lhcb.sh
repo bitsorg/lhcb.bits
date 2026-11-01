@@ -12,6 +12,11 @@ version: v1
 
 variables:
   release: "main"
+  # DD4hep with Geant4 units, which Detector requires (lcg.bits' DD4hep patch,
+  # gated on it); export: false keeps a --set of it out of other hashes too.
+  dd4hep_geant4_units:
+    value: true
+    export: false
 
 requires:
   - stacks.bits
@@ -285,15 +290,6 @@ overrides:
     tag: "3.5.9.atlas13"
     sources:
       - https://lcgpackages.web.cern.ch/tarFiles/sources/MCGeneratorsTarFiles/MG5_aMC_v3.5.9.tar.gz
-
-  Gaudi:
-    tag: "v40r2"
-  Detector:
-    tag: "v3r9"
-  LHCb:
-    tag: "v58r8"
-  Lbcom:
-    tag: "v38r8"
 
 # LHCb DD4hep is built minimal (ROOT/XercesC geometry only), like lcgcmake's
 # heptools-lhcbsetup. Disabling these backends prunes them from DD4hep's requires

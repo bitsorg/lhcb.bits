@@ -1,57 +1,51 @@
 package: Detector
+description: The LHCb detector description on DD4hep
 version: "%(tag_basename)s"
-tag: "v3r9"
+tag: "v3r17"   # LHCb stack RTA/2026.08.30 (LCG 108c)
 source: https://gitlab.cern.ch/lhcb/Detector.git
 requires:
-  - "GCC-Toolchain:(?!osx)"
-  - Gaudi
+  # DetectorDependencies.cmake (DD4hep with Geant4 units: dd4hep_geant4_units in defaults-lhcb)
+  - lcg-view
   - simple_conddb_cxx
-  - rapidyaml
-  - DD4Hep
-  - yamlcpp
+  - DD4hep
+  - ROOT
   - fmt
-  
+  - yamlcpp
+  - rapidyaml
+  - jsonmcpp
+  - Boost
+  - Vc
+  - rangev3
+  - tbb
 build_requires:
-  - CMake
+  - lcg-toolchains
+  - "GCC-Toolchain:(?!osx)"
   - bits-recipe-tools
-  
-prefer_system: (?!slc5)
-prefer_system_check:
+  - CMake
+  - ninja
+license: GPL-3.0-only
 ---
 #!/bin/bash -e
-##############################
 . $(bits-include CMakeRecipe)
-##############################
-MODULE_OPTIONS="--bin --lib"
-##############################
-function Prepare() {
-    rsync -av --delete --delete-excluded $SOURCEDIR/ ./
-}
+MODULE_OPTIONS="--bin --lib --cmake"
 
 function Configure() {
-  mkdir build && cd build
-  export CXXFLAGS="-I${YAMLCPP_ROOT}/include -march=native "$CCXXFLAGS
-  export LDFLAGS="-L${YAMLCPP_ROOT}/lib "$LDFLAGS
-  cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLROOT \
-	   -DRANGEV3_INCLUDE_DIR=$RANGEV3_ROOT/include \
-	   -DCPPGSL_INCLUDE_DIR=$CPPGSL_ROOT/include \
-	   -DCPPUNIT_INCLUDE_DIR=$CPPUNIT_ROOT/include -DCPPUNIT_LIBRARY=$CPPUNIT_ROOT/lib/libcppunit.so \
-           -DGAUDI_USE_HEPPDT=ON \
-           -DGAUDI_USE_AIDA=OFF \
-           -DGAUDI_USE_DOXYGEN=OFF \
-           -DGAUDI_USE_GPERFTOOLS=FALSE \
-           -DCMAKE_FIND_FRAMEWORK=LAST \
-           -DBoost_NO_BOOST_CMAKE=FALSE \
-           -DCMAKE_CXX_STANDARD=20 \
-	   -DBUILD_TESTING=FALSE \
-           -DCMAKE_PREFIX_PATH="$FMT_ROOT;$YAMLCPP_ROOT;$RAPIDYAML_ROOT;$BOOST_ROOT;$VC_ROOT;$CATCH2_ROOT;$SIMPLE_CONDDB_CXX_ROOT;"
+  # As lb-stack-setup builds it: the LHCb toolchain lcg-view made for the platform
+  # (its compilation_flags set the build type from it: opt, dbg, opt+g).
+  local plat=${LCG_PLATFORM:-$EFFECTIVE_ARCHITECTURE}
+  local tc=("$LCG_VIEW_ROOT"/lcg-toolchains/LCG_*/"$plat".cmake)
+  [[ -f ${tc[0]} ]] || { echo "no LHCb toolchain for $plat in $LCG_VIEW_ROOT" >&2; exit 1; }
+  cmake -S "$BITS_CMAKE_SRC" -B "$BITS_CMAKE_BUILD" -G Ninja \
+    -DCMAKE_TOOLCHAIN_FILE="${tc[0]}" \
+    -DCMAKE_INSTALL_PREFIX="$INSTALLROOT" \
+    -DBUILD_TESTING=OFF
 }
 
-function Make() {
-   cmake --build . -- ${CMAKE_OPTIONS} ${JOBS:+-j$JOBS}
+function PostInstall() {
+  cat >> "$MODULEFILE" <<EoF
+prepend-path PYTHONPATH        \$PKG_ROOT/python
+prepend-path ROOT_INCLUDE_PATH \$PKG_ROOT/include
+prepend-path GAUDI_PLUGIN_PATH \$PKG_ROOT/lib
+setenv DETECTOR_PROJECT_ROOT   \$PKG_ROOT
+EoF
 }
-
-function MakeInstall() {
-    cmake --install .    
-}
-

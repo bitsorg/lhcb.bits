@@ -1,38 +1,16 @@
 package: simple_conddb_cxx
+description: LHCb's conditions database reader (C++ over Rust), used by Detector
 version: "%(tag_basename)s"
 tag: "v0.1.0"
 source: https://gitlab.cern.ch/lhcb/simple_conddb_cxx.git
-requires:
-  - "GCC-Toolchain:(?!osx)"
-  
 build_requires:
+  - "GCC-Toolchain:(?!osx)"
   - bits-recipe-tools
   - CMake
+  # Its CMake fetches Corrosion and CLI11 and cargo the crates: the build needs network.
   - rust
-  
-prefer_system: (?!slc5)
-prefer_system_check:
+license: Apache-2.0
 ---
 #!/bin/bash -e
-##############################
 . $(bits-include CMakeRecipe)
-##############################
 MODULE_OPTIONS="--bin --lib --cmake"
-##############################
-function Prepare() {
-    rsync -av --delete --delete-excluded $SOURCEDIR/ ./
-}
-
-function Configure() {
-  mkdir build && cd build
-  cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLROOT 
-}
-
-function Make() {
-   cmake --build . -- ${CMAKE_OPTIONS} ${JOBS:+-j$JOBS}
-}
-
-function MakeInstall() {
-    cmake --install .    
-}
-

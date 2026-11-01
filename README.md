@@ -85,8 +85,9 @@ make Gaudi
 
 The settings stay in the stack directory: later it is only `bits enter`, `source
 setupLHCb.sh` and `make`. lb-stack-setup checks out the projects' default branches; the
-versions this repository pins (e.g. Gaudi `v40r2`, in `defaults-lhcb.sh`) are the ones
-built against these externals. LbDevTools works the same way after `source setupLHCb.sh`.
+versions this repository's recipes pin ([The LHCb projects as bits
+packages](#the-lhcb-projects-as-bits-packages)) are the ones that go with these externals.
+LbDevTools works the same way after `source setupLHCb.sh`.
 
 ### Building the externals yourself
 
@@ -114,6 +115,54 @@ CI built. To build elsewhere, `export BITS_WORK_DIR=/path/to/sw`.
 selects the `LCG_110` branches of lcg.bits and stacks.bits and versions `lcg-view`;
 `lcg-view` refuses a value that is not an LCG release. To build only the externals, without
 the manifest and toolchain, build `lcg-externals` instead.
+
+### The LHCb projects as bits packages
+
+The projects up to DaVinci also build as bits packages, at the versions of the LHCb stack
+`RTA/2026.08.30` (LCG 108c, in
+[lhcbstacks](https://gitlab.cern.ch/lhcb-core/lhcbstacks/-/blob/master/data/stacks/RTA/2026.08.30.yml)):
+
+| Project | Version | Project | Version |
+|---|---|---|---|
+| Gaudi | `v40r5` | Rec | `v41r1` |
+| Detector | `v3r17` | Allen | `v9r1` (CPU) |
+| LHCb | `v60r1` | Moore | `v60r1` |
+| Lbcom | `v40r1` | DaVinci | `v68r1` |
+
+with the data packages they look for, at their versions of that date: FieldMap `v5r11`,
+ParamFiles `v8r72`, PRConfig `v1r116`, RawEventFormat `v1r10p1`, TCK/HltTCK `v3r19p29`,
+TMVAWeights `v1r20`, AppConfig `v3r469`, SprucingConfig `v26r7p2` and QMTestFiles `v1r3`.
+New, and not built by the CI yet. In a checkout of this repository:
+
+```bash
+bits use --architecture x86_64-el9 --defaults lhcb::gcc15::opt
+bits use build --docker --set release=LCG_110
+bits build DaVinci                      # the externals, then Gaudi ... DaVinci
+bits enter DaVinci/latest
+```
+
+Each project is built as lb-stack-setup builds it: with the LHCb toolchain `lcg-view` makes
+for the platform (`CMAKE_TOOLCHAIN_FILE`, whose flags follow `opt`, `dbg` or `opt+g`) and
+the fragments of `lcg-toolchains`, with Ninja, without the tests and, for Rec, Moore and
+DaVinci, without the functor caches (`BUILD_FUNCTOR_CACHE=OFF`; functors are compiled when
+first used). A recipe requires the project below it, the externals of its
+`cmake/<Project>Dependencies.cmake` and the data packages it finds with
+`find_data_package`. A data package is installed as `<prefix>/<name>/<version>`, where
+`find_data_package` looks, and its module sets what its `.xenv` sets. A project's module
+adds its `python`, `include` and `lib` to `PYTHONPATH`, `ROOT_INCLUDE_PATH` and
+`GAUDI_PLUGIN_PATH`, and sets the variables the installed project needs at run time
+(`DETECTOR_PROJECT_ROOT`, the functor compiler's, `ALLEN_INSTALL_DIR`, and LHCb's
+`PYTHONHASHSEED=0` and thread limits); those that point into a project's sources, such as
+`STDOPTS`, are not set. DD4hep is built with Geant4 units, which Detector requires: the
+`dd4hep_geant4_units` variable in `defaults-lhcb.sh` turns on a patch of lcg.bits' DD4hep
+recipe (lcg.bits needs that patch first). Two packages need the network while they build:
+`simple_conddb_cxx` (its CMake fetches Corrosion and CLI11, and cargo its crates) and
+TCK/HltTCK (its Makefile downloads the TCK database, about 280 MB, checked against its
+sha256 in git). The released LHCb platforms are the `x86_64_v3` ones; these recipes build
+the baseline `x86_64` toolchain.
+
+To move to another stack, take the project tags from its file in lhcbstacks and the data
+packages' tags of its date, in these recipes.
 
 ## LHCb versions
 
@@ -161,11 +210,13 @@ when a tag or source does not follow the version: that needs an override by hand
 
 | File | Role |
 |---|---|
-| `defaults-lhcb.sh` | LHCb overlay on the stacks.bits base: the versions of LHCb's LCG flavour (generated), LHCb generator variants, tags for Gaudi, Detector, LHCb and Lbcom, and DD4hep built minimal (Geant4, LCIO and EDM4hep disabled). The CVMFS layout is in `cvmfs.yaml`. |
+| `defaults-lhcb.sh` | LHCb overlay on the stacks.bits base: the versions of LHCb's LCG flavour (generated), LHCb generator variants, and DD4hep built minimal (Geant4, LCIO and EDM4hep disabled) with Geant4 units. The CVMFS layout is in `cvmfs.yaml`. |
 | `tools/lcg-deltas.py` | Writes the version overrides of `defaults-lhcb.sh` from LHCb's `lcg-toolchains` ([LHCb versions](#lhcb-versions)). |
 | `lcg-externals.sh` | Meta-package: LHCb's top-level LCG externals. |
 | `lcg-view.sh` | Top of the externals build: writes `LCG_externals_<platform>.txt`, the LHCb toolchain `lcg-toolchains/LCG_<N>/<platform>.cmake` (plus an `x86_64_v3` variant) and `bin/setupLHCb.sh`, which points LbEnv / lb-stack-setup at it. |
-| `gaudi.sh`, `detector.sh`, `lhcb.sh`, `lbcom.sh`, `simple_conddb_cxx.sh` | Recipes for the LHCb projects themselves. Work in progress; build the projects with lb-stack-setup ([Building Gaudi and the LHCb projects](#building-gaudi-and-the-lhcb-projects)). |
+| `gaudi.sh`, `detector.sh`, `lhcb.sh`, `lbcom.sh`, `rec.sh`, `allen.sh`, `moore.sh`, `davinci.sh` | The LHCb projects up to DaVinci ([The LHCb projects as bits packages](#the-lhcb-projects-as-bits-packages)). |
+| `fieldmap.sh`, `paramfiles.sh`, `prconfig.sh`, `raweventformat.sh`, `hlttck.sh`, `tmvaweights.sh`, `appconfig.sh`, `sprucingconfig.sh`, `qmtestfiles.sh` | The LHCb data packages the projects find. |
+| `lcg-toolchains.sh`, `simple_conddb_cxx.sh` | LHCb's toolchain fragments, which the `lcg-view` toolchain includes, and the conditions reader Detector uses. |
 
 ## More information
 
