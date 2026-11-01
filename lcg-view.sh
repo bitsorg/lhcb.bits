@@ -198,7 +198,7 @@ case "$plat" in
 esac
 
 # LHCb toolchain. LbDevTools includes lcg-toolchains/LCG_$LCG_VERSION/$BINARY_TAG.cmake
-# found on CMAKE_PREFIX_PATH (see setupLHCb.sh): one for the platform and, on
+# found on CMAKE_PREFIX_PATH (see bin/setupLHCb.sh): one for the platform and, on
 # x86_64, an x86_64_v3 wrapper around it (as in LHCb's lcg-toolchains).
 tcdir="$INSTALLROOT/lcg-toolchains/LCG_$relnum$postfix"
 mkdir -p "$tcdir"
@@ -369,9 +369,72 @@ else
   echo "lcg-view: no GCC-Toolchain; LHCb toolchain not generated" >&2
 fi
 
-# Carry the LCG vars to dependents via the modulefile (--none emits no env:).
+# setupLHCb.sh, on PATH in `bits enter lcg-view/<version>`: points LbEnv and
+# lb-stack-setup at this lcg-view (its LHCb toolchain and externals).
+mkdir -p "$INSTALLROOT/bin"
+cat > "$INSTALLROOT/bin/setupLHCb.sh" <<\SETUP
+# setupLHCb.sh [BINARY_TAG] - build LHCb projects against the lcg-view it comes
+# with (bash). Source it in `bits enter lcg-view/<version>`; it sources LbEnv when needed.
+_lb_argv=("$@")
+if ! command -v lb-run > /dev/null 2>&1 && [ -r /cvmfs/lhcb.cern.ch/lib/LbEnv ]; then
+    set --                       # LbEnv parses its own arguments, not ours
+    . /cvmfs/lhcb.cern.ch/lib/LbEnv
+    set -- "${_lb_argv[@]}"
+fi
+unset _lb_argv
+_lb_setup() {
+    local tag="$1" view tc plat keep=() p
+    view=$(CDPATH= cd -P "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd) || view=
+    tc=$(ls -d "$view"/lcg-toolchains/LCG_* 2>/dev/null | head -1)
+    plat=$(ls "$tc" 2>/dev/null | grep -v '^x86_64_v3-' | head -1)
+    plat=${plat%.cmake}
+    if [ -z "$plat" ]; then
+        echo "setupLHCb.sh: no LHCb toolchain in ${view:-the lcg-view}" >&2
+        return 1
+    fi
+    if [ -z "$tag" ]; then
+        tag=$plat
+        case "$plat" in
+            x86_64-*) /lib64/ld-linux-x86-64.so.2 --help 2>/dev/null | grep -q 'x86-64-v3 (supported' \
+                          && tag="x86_64_v3-${plat#x86_64-}" ;;
+        esac
+    fi
+    if [ ! -f "$tc/$tag.cmake" ]; then
+        echo "setupLHCb.sh: no toolchain $tag in $tc; have: $(ls "$tc" | sed 's/\.cmake$//' | tr '\n' ' ')" >&2
+        return 1
+    fi
+    command -v lb-run > /dev/null 2>&1 || echo "setupLHCb.sh: note: LbEnv not set up (lb-run not found)" >&2
+    # LbEnv's .../lib/lcg and .../lib/contrib would win for anything the view lacks.
+    local - IFS=:
+    set -f
+    for p in ${CMAKE_PREFIX_PATH:-}; do
+        case "$p" in */lib/lcg|*/lib/lcg/*|*/lib/contrib|*/lib/contrib/*) ;; *) keep+=("$p") ;; esac
+    done
+    export CMAKE_PREFIX_PATH="$view${keep[*]:+:${keep[*]}}"
+    unset IFS
+    export BINARY_TAG="$tag"
+    export LCG_VERSION="${tc##*/LCG_}"
+    export LCG_RELEASE_BASE="$view"
+    echo "setupLHCb.sh: BINARY_TAG=$BINARY_TAG LCG_VERSION=$LCG_VERSION"
+    echo "setupLHCb.sh: lcg-view $view"
+    echo "setupLHCb.sh: for lb-stack-setup (native mode, not docker):"
+    echo "    utils/config.py binaryTag $BINARY_TAG"
+    echo "    utils/config.py lcgVersion $LCG_VERSION"
+    echo "    utils/config.py cmakePrefixPath '$CMAKE_PREFIX_PATH'"
+    echo "    utils/config.py useDocker false"
+}
+if ! _lb_setup "${1:-}"; then
+    unset -f _lb_setup
+    return 1 2> /dev/null || exit 1
+fi
+unset -f _lb_setup
+SETUP
+
+# Carry the LCG vars to dependents via the modulefile (--none emits no env:),
+# and setupLHCb.sh on PATH.
 MakeModule
 cat >> "$MODULEFILE" <<EOF
 setenv LCG_RELEASE_BASE  \$PKG_ROOT
 setenv LCG_PLATFORM      $plat
+prepend-path PATH        \$PKG_ROOT/bin
 EOF
