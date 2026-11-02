@@ -49,10 +49,15 @@ The LHCb externals are published on CVMFS as `lcg-view` releases (now `LCG_110` 
 out:
 
 ```bash
-bits --community lhcb q lcg-view          # the published versions: lcg-view/LCG_110-<N>
-bits --community lhcb enter -a x86_64-el9-gcc14-opt lcg-view/<version>
-source setupLHCb.sh                       # in that sub-shell
+export BITS_CVMFS_PREFIX=/cvmfs/bits.cern.ch/lhcb
+bits q -a x86_64-el9-gcc14-opt lcg-view           # the published versions: lcg-view/LCG_110-<N>
+bits enter -a x86_64-el9-gcc14-opt lcg-view/<version>
+source setupLHCb.sh                               # in that sub-shell
 ```
+
+`BITS_CVMFS_PREFIX` names LHCb's tree (with the CVMFS entry point
+`/cvmfs/bits.cern.ch/bits/bin/bits`, `bits --community lhcb ...` sets it; in a checkout of
+this repository, `cvmfs.yaml` does). `-a` picks one of the published platforms.
 
 `setupLHCb.sh` comes with the `lcg-view` builds made since it moved into the recipe (from
 November 2026; `LCG_110-1` and `LCG_110-2` do not have it). Outside `bits enter`, source it
