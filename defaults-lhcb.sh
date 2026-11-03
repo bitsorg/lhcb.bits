@@ -12,6 +12,11 @@ version: v1
 
 variables:
   release: "main"
+  # lcg.bits' branch, release's unless set (--set lcg_branch=<a PR's branch>);
+  # export: false keeps it out of the hashes, which follow the recipes it selects.
+  lcg_branch:
+    value: "%(release)s"
+    export: false
   # DD4hep with Geant4 units, which Detector requires (lcg.bits' DD4hep patch,
   # gated on it); export: false keeps a --set of it out of other hashes too.
   dd4hep_geant4_units:
@@ -24,9 +29,9 @@ requires:
 # The LHCb CVMFS namespace and layout are in cvmfs.yaml.
 
 overrides:
-  # Recipe pool and policy layer at the branch named by `release`.
+  # Recipe pool and policy layer at the branches lcg_branch and release name.
   lcg.bits:
-    tag: "%(release)s"
+    tag: "%(lcg_branch)s"
   stacks.bits:
     tag: "%(release)s"
 
