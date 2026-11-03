@@ -261,15 +261,12 @@ overrides:
       - "https://lcgpackages.web.cern.ch/tarFiles/sources/MCGeneratorsTarFiles/YODA-1.9.11.tar.gz"
   # --- end of generated overrides ---
 
-  # onnx 1.16 builds its python module with pybind11, whose submodule its source
-  # tarball lacks (1.18+ uses nanobind).
+  # onnx 1.16 from its tarball, which bundles pybind11: lcg.bits' recipe may build
+  # from git instead (LCG_110b), whose checkout lacks that submodule.
   onnx:
     version: "1.16.0"
-    build_requires:
-      - CMake
-      - bits-recipe-tools
-      - "GCC-Toolchain:(?!osx)"
-      - pybind11
+    sources:
+      - https://lcgpackages.web.cern.ch/tarFiles/sources/onnx-1.16.0.tar.gz
 
   # LCG's catboost 1.2 for LHCb is its C++ model interface (Rec), from this tarball.
   catboost:
