@@ -167,8 +167,10 @@ adds its `python`, `include` and `lib` to `PYTHONPATH`, `ROOT_INCLUDE_PATH` and
 recipe (lcg.bits needs that patch first). Two packages need the network while they build:
 `simple_conddb_cxx` (its CMake fetches Corrosion and CLI11, and cargo its crates) and
 TCK/HltTCK (its Makefile downloads the TCK database, about 280 MB, checked against its
-sha256 in git). The released LHCb platforms are the `x86_64_v3` ones; these recipes build
-the baseline `x86_64` toolchain.
+sha256 in git). As LHCb releases them, x86_64 builds are for `x86_64_v3`
+(`-march=x86-64-v3`, `LHCB_PLATFORM` `x86_64_v3-el9-…`): the build host and the machines
+running them need AVX2. `-DLCG_ARCHITECTURE=x86_64_v2` in a recipe's Configure lowers it
+(Detector needs at least SSE4.2, so not the baseline `x86_64`).
 
 To move to another stack, take the project tags from its file in lhcbstacks and the data
 packages' tags of its date, in these recipes.
