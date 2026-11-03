@@ -46,8 +46,8 @@ string(REGEX REPLACE "-[^-]+\$" "" LCG_HOST "${LCG_SYSTEM}")
 set(FRAGMENTS_DIR "${CMAKE_CURRENT_LIST_DIR}/fragments")
 
 # Compiler: the build environment's GCC-Toolchain, through wrapper scripts as in
-# lcg-toolchains (Rec's FunctorCore reads the compiler file as one). ID and version
-# are preset because the flag logic below runs before CMake detects the compiler.
+# lcg-toolchains (Rec's FunctorCore reads the compiler file as one), which keep the
+# environment. ID and version are preset: the flag logic runs before CMake detects it.
 set(_gcc_root "$ENV{GCC_TOOLCHAIN_ROOT}")
 if(_gcc_root AND EXISTS "${_gcc_root}/bin/g++")
   execute_process(COMMAND "${_gcc_root}/bin/g++" -dumpfullversion
@@ -61,8 +61,6 @@ if(_gcc_root AND EXISTS "${_gcc_root}/bin/g++")
     if(EXISTS "${_gcc_root}/bin/${_cmd}")
       file(WRITE "${CMAKE_BINARY_DIR}/toolchain/${_cmd}"
 "#!/bin/sh
-export PATH=${_gcc_root}/bin:/usr/bin:/bin
-export LD_LIBRARY_PATH=${_gcc_root}/lib64
 exec ${_gcc_root}/bin/${_cmd} \"\$@\"
 ")
       execute_process(COMMAND chmod a+x "${CMAKE_BINARY_DIR}/toolchain/${_cmd}")
