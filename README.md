@@ -226,6 +226,7 @@ when a tag or source does not follow the version: that needs an override by hand
 | `gaudi.sh`, `detector.sh`, `lhcb.sh`, `lbcom.sh`, `rec.sh`, `allen.sh`, `moore.sh`, `davinci.sh` | The LHCb projects up to DaVinci ([The LHCb projects as bits packages](#the-lhcb-projects-as-bits-packages)). |
 | `fieldmap.sh`, `paramfiles.sh`, `prconfig.sh`, `raweventformat.sh`, `hlttck.sh`, `tmvaweights.sh`, `appconfig.sh`, `sprucingconfig.sh`, `qmtestfiles.sh` | The LHCb data packages the projects find. |
 | `lhcb-toolchains.sh`, `simple_conddb_cxx.sh` | LHCb's toolchain fragments (its lcg-toolchains repository), which the `lcg-view` toolchain includes, with `bits-toolchain.cmake`, which the projects build with; and the conditions reader Detector uses. |
+| `python.sh`, `gdbm.sh` | Temporary: lcg.bits' Python with GNU dbm (static), so that Python 3.12 writes Gaudi's `Gaudi.confdb2` with `dbm.gnu`. |
 
 ## More information
 
