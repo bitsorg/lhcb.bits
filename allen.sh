@@ -25,7 +25,7 @@ requires:
   - pyeda
   - lxml
 build_requires:
-  - lcg-toolchains
+  - lhcb-toolchains
   - "GCC-Toolchain:(?!osx)"
   - bits-recipe-tools
   - CMake

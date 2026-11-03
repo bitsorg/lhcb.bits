@@ -27,7 +27,7 @@ requires:
   # Python modules its python packages import
   - future
 build_requires:
-  - lcg-toolchains
+  - lhcb-toolchains
   - "GCC-Toolchain:(?!osx)"
   - bits-recipe-tools
   - CMake

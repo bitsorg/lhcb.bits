@@ -150,7 +150,7 @@ A project needs neither `lcg-view` nor an LCG release: it builds against the lcg
 stacks.bits branches `release` names (`main` by default, or `--set release=LCG_110`). To
 build against another lcg.bits branch, a pull request's for example, add
 `--set lcg_branch=<branch>`. Each project is configured with `bits-toolchain.cmake`
-from `lcg-toolchains` (`CMAKE_TOOLCHAIN_FILE`): LHCb's compilation flags for the platform
+from `lhcb-toolchains` (`CMAKE_TOOLCHAIN_FILE`): LHCb's compilation flags for the platform
 (`opt`, `dbg` or `opt+g`), the build's GCC-Toolchain and its dependencies from
 `CMAKE_PREFIX_PATH`. It builds with Ninja, without the tests and, for Rec, Moore and
 DaVinci, without the functor caches (`BUILD_FUNCTOR_CACHE=OFF`; functors are compiled when
@@ -225,7 +225,7 @@ when a tag or source does not follow the version: that needs an override by hand
 | `lcg-view.sh` | Top of the externals build: writes `LCG_externals_<platform>.txt`, the LHCb toolchain `lcg-toolchains/LCG_<N>/<platform>.cmake` (plus an `x86_64_v3` variant) and `bin/setupLHCb.sh`, which points LbEnv / lb-stack-setup at it. |
 | `gaudi.sh`, `detector.sh`, `lhcb.sh`, `lbcom.sh`, `rec.sh`, `allen.sh`, `moore.sh`, `davinci.sh` | The LHCb projects up to DaVinci ([The LHCb projects as bits packages](#the-lhcb-projects-as-bits-packages)). |
 | `fieldmap.sh`, `paramfiles.sh`, `prconfig.sh`, `raweventformat.sh`, `hlttck.sh`, `tmvaweights.sh`, `appconfig.sh`, `sprucingconfig.sh`, `qmtestfiles.sh` | The LHCb data packages the projects find. |
-| `lcg-toolchains.sh`, `simple_conddb_cxx.sh` | LHCb's toolchain fragments, which the `lcg-view` toolchain includes, with `bits-toolchain.cmake`, which the projects build with; and the conditions reader Detector uses. |
+| `lhcb-toolchains.sh`, `simple_conddb_cxx.sh` | LHCb's toolchain fragments (its lcg-toolchains repository), which the `lcg-view` toolchain includes, with `bits-toolchain.cmake`, which the projects build with; and the conditions reader Detector uses. |
 
 ## More information
 

@@ -1,4 +1,4 @@
-package: lcg-toolchains
+package: lhcb-toolchains
 description: LHCb's lcg-toolchains fragments (compiler flags, package handling), and bits-toolchain.cmake that the LHCb projects build with
 version: "%(short_hash)s"
 tag: "e5d8a399ab8d815e38ee9f1172ed24dbfe890daf"   # master of 2026-07-29 (LHCB_11 added)
@@ -7,7 +7,7 @@ build_requires:
   - bits-recipe-tools
 license: GPL-3.0-only
 env:
-  LCG_TOOLCHAINS_DIR: "$LCG_TOOLCHAINS_ROOT"
+  LCG_TOOLCHAINS_DIR: "$LHCB_TOOLCHAINS_ROOT"
 ---
 #!/bin/bash -e
 . $(bits-include ModuleRecipe)
