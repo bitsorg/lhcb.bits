@@ -141,18 +141,22 @@ New, and not built by the CI yet. In a checkout of this repository:
 
 ```bash
 bits use --architecture x86_64-el9 --defaults lhcb::gcc15::opt
-bits use build --docker --set release=LCG_110
-bits build DaVinci                      # the externals, then Gaudi ... DaVinci
-bits enter DaVinci/latest
+bits use build --docker
+bits build Gaudi                        # its externals, then Gaudi; or any project up to DaVinci
+bits enter Gaudi/latest
 ```
 
-Each project is built as lb-stack-setup builds it: with the LHCb toolchain `lcg-view` makes
-for the platform (`CMAKE_TOOLCHAIN_FILE`, whose flags follow `opt`, `dbg` or `opt+g`) and
-the fragments of `lcg-toolchains`, with Ninja, without the tests and, for Rec, Moore and
+A project needs neither `lcg-view` nor an LCG release: it builds against the lcg.bits and
+stacks.bits branches `release` names (`main` by default, or `--set release=LCG_110`). To
+build against another lcg.bits branch, a pull request's for example, add
+`--set lcg_branch=<branch>`. Each project is configured with `bits-toolchain.cmake`
+from `lcg-toolchains` (`CMAKE_TOOLCHAIN_FILE`): LHCb's compilation flags for the platform
+(`opt`, `dbg` or `opt+g`), the build's GCC-Toolchain and its dependencies from
+`CMAKE_PREFIX_PATH`. It builds with Ninja, without the tests and, for Rec, Moore and
 DaVinci, without the functor caches (`BUILD_FUNCTOR_CACHE=OFF`; functors are compiled when
 first used). A recipe requires the project below it, the externals of its
-`cmake/<Project>Dependencies.cmake` and the data packages it finds with
-`find_data_package`. A data package is installed as `<prefix>/<name>/<version>`, where
+`cmake/<Project>Dependencies.cmake`, the Python modules its python packages import and the
+data packages it finds with `find_data_package`. A data package is installed as `<prefix>/<name>/<version>`, where
 `find_data_package` looks, and its module sets what its `.xenv` sets. A project's module
 adds its `python`, `include` and `lib` to `PYTHONPATH`, `ROOT_INCLUDE_PATH` and
 `GAUDI_PLUGIN_PATH`, and sets the variables the installed project needs at run time
@@ -198,8 +202,8 @@ when a tag or source does not follow the version: that needs an override by hand
 ## Notes for LHCb users
 
 - **Releases.** The release comes from the command line; the default `main` follows the
-  main branches of lcg.bits and stacks.bits. The versions are LHCb's in any case
-  ([LHCb versions](#lhcb-versions)).
+  main branches of lcg.bits and stacks.bits; `lcg_branch` moves lcg.bits alone. The
+  versions are LHCb's in any case ([LHCb versions](#lhcb-versions)).
 - **CVMFS layout.** Builds publish under `/cvmfs/bits.cern.ch/lhcb` with the shared
   [stacks.bits layout](https://github.com/bitsorg/stacks.bits#cvmfs-layout); only the
   prefix differs. When `lcg-view` is published, its manifest is rewritten to the published
@@ -221,7 +225,7 @@ when a tag or source does not follow the version: that needs an override by hand
 | `lcg-view.sh` | Top of the externals build: writes `LCG_externals_<platform>.txt`, the LHCb toolchain `lcg-toolchains/LCG_<N>/<platform>.cmake` (plus an `x86_64_v3` variant) and `bin/setupLHCb.sh`, which points LbEnv / lb-stack-setup at it. |
 | `gaudi.sh`, `detector.sh`, `lhcb.sh`, `lbcom.sh`, `rec.sh`, `allen.sh`, `moore.sh`, `davinci.sh` | The LHCb projects up to DaVinci ([The LHCb projects as bits packages](#the-lhcb-projects-as-bits-packages)). |
 | `fieldmap.sh`, `paramfiles.sh`, `prconfig.sh`, `raweventformat.sh`, `hlttck.sh`, `tmvaweights.sh`, `appconfig.sh`, `sprucingconfig.sh`, `qmtestfiles.sh` | The LHCb data packages the projects find. |
-| `lcg-toolchains.sh`, `simple_conddb_cxx.sh` | LHCb's toolchain fragments, which the `lcg-view` toolchain includes, and the conditions reader Detector uses. |
+| `lcg-toolchains.sh`, `simple_conddb_cxx.sh` | LHCb's toolchain fragments, which the `lcg-view` toolchain includes, with `bits-toolchain.cmake`, which the projects build with; and the conditions reader Detector uses. |
 
 ## More information
 
