@@ -197,6 +197,12 @@ defaults work around it. Each workaround goes when the project or lcg.bits fixes
 | `defaults-lhcb.sh` | scikit-learn pinned by hand to LHCb's 1.5.2, with LHCb's dependencies | lcg.bits' 1.9.0 needs meson >= 1.9 (LHCb's is 1.3.2) and pyarrow |
 | `detector.sh` | `PostInstall` removes `bin/run` | Detector installs its wrapper for running from the build tree, which names only the build area |
 
+Two leftovers of Allen's build are published. `ALLEN_PROJECT_ROOT`, in the `<Project>Config.cmake` of
+Allen, Moore and DaVinci, points at Allen's source tree, which is not installed; Allen's
+`Dumpers/BinaryDumpers/options/allen.py` and its tests read it, so they do not work from the published
+package. Allen's exported `AllenLib` carries the compile definition `CMAKE_ALLEN_BUILD_DIR`, which only a
+standalone Allen build reads.
+
 To move to another stack, take the project tags from its file in lhcbstacks and the data
 packages' tags of its date, in these recipes.
 
