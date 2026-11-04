@@ -137,13 +137,21 @@ The projects up to DaVinci also build as bits packages, at the versions of the L
 with the data packages they look for, at their versions of that date: FieldMap `v5r11`,
 ParamFiles `v8r72`, PRConfig `v1r116`, RawEventFormat `v1r10p1`, TCK/HltTCK `v3r19p29`,
 TMVAWeights `v1r20`, AppConfig `v3r469`, SprucingConfig `v26r7p2` and QMTestFiles `v1r3`.
-New, and not built by the CI yet. In a checkout of this repository:
+Not built by the CI yet; DaVinci and every project below it build with these commands
+(`x86_64-el9`, `gcc14`, `opt`, `LCG_110`, in Docker). In a checkout of this repository:
 
 ```bash
-bits use --architecture x86_64-el9 --defaults lhcb::gcc15::opt
-bits use build --docker
-bits build Gaudi                        # its externals, then Gaudi; or any project up to DaVinci
-bits enter Gaudi/latest
+bits use --architecture x86_64-el9 --defaults lhcb::gcc14::opt
+bits use build --docker --set release=LCG_110
+bits build DaVinci                      # its externals and the projects below it; or any one of them
+bits enter DaVinci/latest
+```
+
+or in one command, without a `bits use` profile:
+
+```bash
+bits build --config-dir . --docker --defaults lhcb::gcc14::opt --set release=LCG_110 \
+    --architecture x86_64-el9 DaVinci
 ```
 
 A project needs neither `lcg-view` nor an LCG release: it builds against the lcg.bits and
@@ -152,11 +160,17 @@ build against another lcg.bits branch, a pull request's for example, add
 `--set lcg_branch=<branch>`. Each project is configured with `bits-toolchain.cmake`
 from `lhcb-toolchains` (`CMAKE_TOOLCHAIN_FILE`): LHCb's compilation flags for the platform
 (`opt`, `dbg` or `opt+g`), the build's GCC-Toolchain and its dependencies from
-`CMAKE_PREFIX_PATH`. It builds with Ninja, without the tests and, for Rec, Moore and
-DaVinci, without the functor caches (`BUILD_FUNCTOR_CACHE=OFF`; functors are compiled when
-first used). A recipe requires the project below it, the externals of its
-`cmake/<Project>Dependencies.cmake`, the Python modules its python packages import and the
-data packages it finds with `find_data_package`. A data package is installed as `<prefix>/<name>/<version>`, where
+`CMAKE_PREFIX_PATH`. It builds with Ninja and, for Rec, Moore and DaVinci, without the
+functor caches (`BUILD_FUNCTOR_CACHE=OFF`; functors are compiled when first used). Gaudi,
+LHCb, Rec, Moore and DaVinci are configured with their tests, as LHCb builds them; the
+tests are built, not run. LHCb, Rec and DaVinci do not configure with `BUILD_TESTING=OFF`
+(their CMakeLists use test targets that are then never created); LHCb's tests link
+`GaudiTestSuiteLib`, which Gaudi builds only with its tests; and Allen's installed config
+turns the tests on for Moore anyway. Their test tools (Catch2, pytest, coverage) are build
+requirements only. Detector and Lbcom build without tests; Allen builds its own. A recipe requires the
+project below it, the externals of its `cmake/<Project>Dependencies.cmake`, the Python
+modules its python packages import (for Moore also scikit-learn and matplotlib, which its
+Hlt2Conf bandwidth test scripts import) and the data packages it finds with `find_data_package`. A data package is installed as `<prefix>/<name>/<version>`, where
 `find_data_package` looks, and its module sets what its `.xenv` sets. A project's module
 adds its `python`, `include` and `lib` to `PYTHONPATH`, `ROOT_INCLUDE_PATH` and
 `GAUDI_PLUGIN_PATH`, and sets the variables the installed project needs at run time
@@ -172,6 +186,16 @@ sha256 in git). As LHCb releases them, x86_64 builds are for `x86_64_v3`
 running them need AVX2. `-DLCG_ARCHITECTURE=x86_64_v2` in a recipe's Configure lowers it
 (Detector needs at least SSE4.2, so not the baseline `x86_64`).
 
+Where a project does not build as released against these externals, the recipes or the
+defaults work around it. Each workaround goes when the project or lcg.bits fixes the cause:
+
+| Where | Workaround | Why |
+|---|---|---|
+| `detector.sh` | `Prepare` makes the installed `DetectorConfig.cmake` set `DETECTOR_USE_SIMPLE_CONDDB` before it includes `DetectorDependencies.cmake` | `DetectorDependencies.cmake` otherwise looks for GitCondDB in the projects using Detector, which is built with `simple_conddb_cxx` |
+| `rec.sh` | `XGBoost_EXTRA_INCLUDE_DIR` preset to xgboost's include directory | Rec's `FindXGBoost.cmake` requires rabit headers, which xgboost does not install and Rec does not include |
+| `python.sh`, `gdbm.sh` | A copy of lcg.bits' Python, built with GNU dbm (static) | Without GNU dbm, Python 3.12 writes Gaudi's `Gaudi.confdb2` with ndbm, as `Gaudi.confdb2.db` |
+| `defaults-lhcb.sh` | scikit-learn pinned by hand to LHCb's 1.5.2, with LHCb's dependencies | lcg.bits' 1.9.0 needs meson >= 1.9 (LHCb's is 1.3.2) and pyarrow |
+
 To move to another stack, take the project tags from its file in lhcbstacks and the data
 packages' tags of its date, in these recipes.
 
@@ -181,7 +205,7 @@ The externals are built at the versions of LHCb's own LCG flavour (now `LCG_108c
 `LHCB_11`), not those of the LCG release the recipes come from. `defaults-lhcb.sh` carries
 them as overrides, generated between two marker lines by `tools/lcg-deltas.py` from
 LHCb's [lcg-toolchains](https://gitlab.cern.ch/lhcb-core/lcg-toolchains); entries written by
-hand outside the markers win (the LHCb projects, the LHCb generator variants). To move to
+hand outside the markers win (the LHCb projects, the LHCb generator variants, scikit-learn). To move to
 another flavour, or when the projects' requires change, regenerate (`DaVinci` brings in the
 externals only the LHCb projects need):
 
