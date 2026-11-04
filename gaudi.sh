@@ -28,9 +28,10 @@ build_requires:
   - bits-recipe-tools
   - CMake
   - ninja
-  # its tests: Catch2 (CMakeLists.txt), gaudi_add_pytest (pytest)
+  # its tests: Catch2 (CMakeLists.txt), gaudi_add_pytest (pytest; coverage for GaudiConfiguration)
   - Catch2
   - pytest
+  - coverage
 license: Apache-2.0
 ---
 #!/bin/bash -e
