@@ -48,7 +48,8 @@ function Configure() {
     -DCMAKE_TOOLCHAIN_FILE="$LCG_TOOLCHAINS_DIR/bits-toolchain.cmake" \
     -DLCG_PLATFORM="${LCG_PLATFORM:-$EFFECTIVE_ARCHITECTURE}" \
     -DCMAKE_INSTALL_PREFIX="$INSTALLROOT" \
-    -DBUILD_TESTING=ON -DBUILD_FUNCTOR_CACHE=OFF
+    -DBUILD_TESTING=ON -DBUILD_FUNCTOR_CACHE=OFF \
+    -DXGBoost_EXTRA_INCLUDE_DIR="$XGBOOST_ROOT/include"  # xgboost installs no rabit/ (unused by Rec)
 }
 
 function PostInstall() {
