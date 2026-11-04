@@ -38,6 +38,14 @@ function Configure() {
     -DBUILD_TESTING=OFF
 }
 
+function Prepare() {
+  rsync -a --delete "${SOURCEDIR}"/ ./ || return
+  # Detector's installed config picks simple_conddb_cxx or GitCondDB on a variable its
+  # consumers never get (so they ask for GitCondDB): record the value Detector used.
+  perl -i -pe 'print "set(DETECTOR_USE_SIMPLE_CONDDB \@DETECTOR_USE_SIMPLE_CONDDB\@)\n" if /^include\(.*DetectorDependencies\.cmake/' cmake/DetectorConfig.cmake.in
+  grep -q '^set(DETECTOR_USE_SIMPLE_CONDDB' cmake/DetectorConfig.cmake.in
+}
+
 function PostInstall() {
   cat >> "$MODULEFILE" <<EoF
 prepend-path PYTHONPATH        \$PKG_ROOT/python
