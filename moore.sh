@@ -18,12 +18,16 @@ requires:
   # Python modules its python packages import
   - cachetools
   - pydantic
+  - scikitlearn
+  - matplotlib
 build_requires:
   - lhcb-toolchains
   - "GCC-Toolchain:(?!osx)"
   - bits-recipe-tools
   - CMake
   - ninja
+  # its tests: gaudi_add_pytest collects them at build time
+  - pytest
 license: GPL-3.0-only
 ---
 #!/bin/bash -e
@@ -31,13 +35,14 @@ license: GPL-3.0-only
 MODULE_OPTIONS="--bin --lib --cmake"
 
 function Configure() {
-  # LHCb's compilation flags for the platform (opt, dbg, opt+g), with the defaults'
-  # CMAKE_BUILD_TYPE unset so they decide; the externals are this package's dependencies.
+  # LHCb's flags for the platform (opt, dbg, opt+g) decide, CMAKE_BUILD_TYPE unset; the
+  # externals are this package's dependencies. Tests are on (built, not run): Allen's
+  # installed AllenDependencies.cmake sets BUILD_TESTING ON for all its consumers anyway.
   env -u CMAKE_BUILD_TYPE cmake -S "$BITS_CMAKE_SRC" -B "$BITS_CMAKE_BUILD" -G Ninja \
     -DCMAKE_TOOLCHAIN_FILE="$LCG_TOOLCHAINS_DIR/bits-toolchain.cmake" \
     -DLCG_PLATFORM="${LCG_PLATFORM:-$EFFECTIVE_ARCHITECTURE}" \
     -DCMAKE_INSTALL_PREFIX="$INSTALLROOT" \
-    -DBUILD_TESTING=OFF -DBUILD_FUNCTOR_CACHE=OFF
+    -DBUILD_TESTING=ON -DBUILD_FUNCTOR_CACHE=OFF
 }
 
 function PostInstall() {
