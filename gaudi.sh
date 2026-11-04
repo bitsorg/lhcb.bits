@@ -28,6 +28,9 @@ build_requires:
   - bits-recipe-tools
   - CMake
   - ninja
+  # its tests: Catch2 (CMakeLists.txt), gaudi_add_pytest (pytest)
+  - Catch2
+  - pytest
 license: Apache-2.0
 ---
 #!/bin/bash -e
@@ -35,13 +38,14 @@ license: Apache-2.0
 MODULE_OPTIONS="--bin --lib --cmake"
 
 function Configure() {
-  # LHCb's compilation flags for the platform (opt, dbg, opt+g), with the defaults'
-  # CMAKE_BUILD_TYPE unset so they decide; the externals are this package's dependencies.
+  # LHCb's flags for the platform (opt, dbg, opt+g) decide, CMAKE_BUILD_TYPE unset; the
+  # externals are this package's dependencies. Tests are configured (built, not run):
+  # LHCb's test code links GaudiTestSuiteLib, which Gaudi builds only with its tests.
   env -u CMAKE_BUILD_TYPE cmake -S "$BITS_CMAKE_SRC" -B "$BITS_CMAKE_BUILD" -G Ninja \
     -DCMAKE_TOOLCHAIN_FILE="$LCG_TOOLCHAINS_DIR/bits-toolchain.cmake" \
     -DLCG_PLATFORM="${LCG_PLATFORM:-$EFFECTIVE_ARCHITECTURE}" \
     -DCMAKE_INSTALL_PREFIX="$INSTALLROOT" \
-    -DBUILD_TESTING=OFF \
+    -DBUILD_TESTING=ON \
     -DGAUDI_USE_DOXYGEN=OFF
 }
 
