@@ -182,12 +182,13 @@ The externals are built at the versions of LHCb's own LCG flavour (now `LCG_108c
 them as overrides, generated between two marker lines by `tools/lcg-deltas.py` from
 LHCb's [lcg-toolchains](https://gitlab.cern.ch/lhcb-core/lcg-toolchains); entries written by
 hand outside the markers win (the LHCb projects, the LHCb generator variants). To move to
-another flavour, regenerate:
+another flavour, or when the projects' requires change, regenerate (`DaVinci` brings in the
+externals only the LHCb projects need):
 
 ```bash
 git clone https://gitlab.cern.ch/lhcb-core/lcg-toolchains.git ../lcg-toolchains
 bits status --json --architecture x86_64-el9 --defaults lhcb::gcc14::opt \
-    --set release=LCG_110 lcg-externals > /tmp/closure.json    # bits with status --set
+    --set release=LCG_110 lcg-externals DaVinci > /tmp/closure.json  # bits with status --set
 tools/lcg-deltas.py --lcginfo ../lcg-toolchains/LCG_108c/lcginfo.json --flavour LHCB_11 \
     --platform x86_64-el9-gcc15-opt --recipes ../lcg.bits --closure /tmp/closure.json \
     --check-urls --write

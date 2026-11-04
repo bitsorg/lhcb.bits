@@ -196,7 +196,7 @@ def main(argv=None):
     p.add_argument("--recipes", required=True, help="an lcg.bits checkout")
     p.add_argument("--defaults", default=os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "..", "defaults-lhcb.sh"))
-    p.add_argument("--closure", help="`bits status --json lcg-externals` output: "
+    p.add_argument("--closure", help="`bits status --json lcg-externals DaVinci` output: "
                    "only its packages get an override")
     p.add_argument("--check-urls", action="store_true",
                    help="check the new source tarballs exist")
