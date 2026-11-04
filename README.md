@@ -195,6 +195,7 @@ defaults work around it. Each workaround goes when the project or lcg.bits fixes
 | `rec.sh` | `XGBoost_EXTRA_INCLUDE_DIR` preset to xgboost's include directory | Rec's `FindXGBoost.cmake` requires rabit headers, which xgboost does not install and Rec does not include |
 | `python.sh`, `gdbm.sh` | A copy of lcg.bits' Python, built with GNU dbm (static) | Without GNU dbm, Python 3.12 writes Gaudi's `Gaudi.confdb2` with ndbm, as `Gaudi.confdb2.db` |
 | `defaults-lhcb.sh` | scikit-learn pinned by hand to LHCb's 1.5.2, with LHCb's dependencies | lcg.bits' 1.9.0 needs meson >= 1.9 (LHCb's is 1.3.2) and pyarrow |
+| `detector.sh` | `PostInstall` removes `bin/run` | Detector installs its wrapper for running from the build tree, which names only the build area |
 
 To move to another stack, take the project tags from its file in lhcbstacks and the data
 packages' tags of its date, in these recipes.

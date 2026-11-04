@@ -47,6 +47,9 @@ function Prepare() {
 }
 
 function PostInstall() {
+  # bin/run is Detector's wrapper for running from its build tree (build-area paths only);
+  # installed, it would also be a broken `run` on PATH.
+  rm -f "$INSTALLROOT/bin/run"
   cat >> "$MODULEFILE" <<EoF
 prepend-path PYTHONPATH        \$PKG_ROOT/python
 prepend-path ROOT_INCLUDE_PATH \$PKG_ROOT/include
