@@ -18,7 +18,8 @@ MODULE_OPTIONS="--root"
 ##############################
 # Temporary, for LHCb's Python (python.sh): static, so its _gdbm needs nothing at
 # run time. Goes when lcg.bits' Python is built with gdbm.
+# -std=gnu17: 1.24's tools/var.c names a member "bool", a keyword in C23 (GCC 15).
 function Configure() {
   ./configure --prefix="$INSTALLROOT" --disable-shared --enable-static --with-pic \
-    --without-readline --disable-nls
+    --without-readline --disable-nls CFLAGS="${CFLAGS:--g -O2} -std=gnu17"
 }
