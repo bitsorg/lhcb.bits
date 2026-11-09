@@ -156,8 +156,6 @@ overrides:
       - "https://lcgpackages.web.cern.ch/tarFiles/sources/MCGeneratorsTarFiles/LHAPDF-6.5.6.tar.gz"
   libzip:
     version: "1.9.2"
-  lxml:
-    version: "5.3.1"
   matplotlib:
     version: "3.10.3"
     tag: "3.10.3"
