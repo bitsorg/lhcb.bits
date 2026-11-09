@@ -63,5 +63,5 @@ function PostInstall() {
   env LD_LIBRARY_PATH="${INSTALLROOT}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" \
     "$INSTALLROOT/bin/python3" -m pip install $preload || return
   env LD_LIBRARY_PATH="${INSTALLROOT}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" \
-    "$INSTALLROOT/bin/python3" -c 'import dbm.gnu'      # else Gaudi's install fails later
+    "$INSTALLROOT/bin/python3" -c 'import dbm.gnu, ctypes'  # Gaudi needs dbm.gnu; ctypes needs libffi headers
 }
