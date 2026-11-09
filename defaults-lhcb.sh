@@ -154,10 +154,6 @@ overrides:
     version: "6.5.6"
     sources:
       - "https://lcgpackages.web.cern.ch/tarFiles/sources/MCGeneratorsTarFiles/LHAPDF-6.5.6.tar.gz"
-  libxslt:
-    # Not LHCb's 1.1.38: that fails on el10, whose libxml2 2.12 no longer
-    # pulls in stdlib.h; 1.1.39 adds the includes.
-    tag: "v1.1.39"
   libzip:
     version: "1.9.2"
   lxml:
