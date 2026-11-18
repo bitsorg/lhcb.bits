@@ -191,11 +191,11 @@ defaults work around it. Each workaround goes when the project or lcg.bits fixes
 
 | Where | Workaround | Why |
 |---|---|---|
-| `detector.sh` | `Prepare` makes the installed `DetectorConfig.cmake` set `DETECTOR_USE_SIMPLE_CONDDB` before it includes `DetectorDependencies.cmake` | `DetectorDependencies.cmake` otherwise looks for GitCondDB in the projects using Detector, which is built with `simple_conddb_cxx` |
-| `rec.sh` | `XGBoost_EXTRA_INCLUDE_DIR` preset to xgboost's include directory | Rec's `FindXGBoost.cmake` requires rabit headers, which xgboost does not install and Rec does not include |
-| `python.sh`, `gdbm.sh` | A copy of lcg.bits' Python, built with GNU dbm (static) | Without GNU dbm, Python 3.12 writes Gaudi's `Gaudi.confdb2` with ndbm, as `Gaudi.confdb2.db` |
+| `packages/detector.sh` | `Prepare` makes the installed `DetectorConfig.cmake` set `DETECTOR_USE_SIMPLE_CONDDB` before it includes `DetectorDependencies.cmake` | `DetectorDependencies.cmake` otherwise looks for GitCondDB in the projects using Detector, which is built with `simple_conddb_cxx` |
+| `packages/rec.sh` | `XGBoost_EXTRA_INCLUDE_DIR` preset to xgboost's include directory | Rec's `FindXGBoost.cmake` requires rabit headers, which xgboost does not install and Rec does not include |
+| `packages/python.sh`, `packages/gdbm.sh` | A copy of lcg.bits' Python, built with GNU dbm (static) | Without GNU dbm, Python 3.12 writes Gaudi's `Gaudi.confdb2` with ndbm, as `Gaudi.confdb2.db` |
 | `defaults-lhcb.sh` | scikit-learn pinned by hand to LHCb's 1.5.2, with LHCb's dependencies | lcg.bits' 1.9.0 needs meson >= 1.9 (LHCb's is 1.3.2) and pyarrow |
-| `detector.sh` | `PostInstall` removes `bin/run` | Detector installs its wrapper for running from the build tree, which names only the build area |
+| `packages/detector.sh` | `PostInstall` removes `bin/run` | Detector installs its wrapper for running from the build tree, which names only the build area |
 
 Two leftovers of Allen's build are published. `ALLEN_PROJECT_ROOT`, in the `<Project>Config.cmake` of
 Allen, Moore and DaVinci, points at Allen's source tree, which is not installed; Allen's
