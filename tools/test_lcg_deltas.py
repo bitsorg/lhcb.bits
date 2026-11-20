@@ -3,6 +3,7 @@
 """python3 -m unittest discover -s tools: the rules of lcg-deltas.py."""
 import importlib.util
 import os
+import tempfile
 import unittest
 
 _spec = importlib.util.spec_from_file_location(
@@ -12,6 +13,18 @@ _spec.loader.exec_module(ld)
 
 
 class Rules(unittest.TestCase):
+    def test_recipes_at_the_root_or_in_recipes(self):
+        with tempfile.TemporaryDirectory() as d:
+            os.mkdir(os.path.join(d, "recipes"))
+            for f, v in (("a.sh", "1"), ("recipes/a.sh", "2"), ("recipes/b.sh", "3"), ("defaults-x.sh", "4")):
+                with open(os.path.join(d, f), "w") as fh:
+                    fh.write("package: %s\nversion: '%s'\n---\n" % (f[-4], v))
+            report = {"unreadable recipe": [], "ambiguous name": []}
+            rec = ld.recipes(d, report)
+            self.assertRaises(SystemExit, ld.recipes, os.path.join(d, "recipes", "none"), report)
+        self.assertEqual({k: h["version"] for k, h in rec.items()}, {ld.key("a"): "1", ld.key("b"): "3"})
+        self.assertEqual(report, {"unreadable recipe": [], "ambiguous name": []})
+
     def test_names(self):
         self.assertEqual(ld.key("Garfield++"), ld.key("GarfieldCPP"))
         self.assertEqual(ld.key("sherpa-openmpi"), ld.key("sherpa_openmpi"))

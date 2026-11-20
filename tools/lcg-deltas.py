@@ -58,13 +58,26 @@ def follow(literal, old, new):
     return out if hit else None
 
 
+def recipe_files(path):
+    """An lcg.bits checkout's recipe files, at its root or in recipes/: a root copy
+    wins, as in bits."""
+    found = {}
+    for d in (path, os.path.join(path, "recipes")):
+        if os.path.isdir(d):
+            for fn in sorted(os.listdir(d)):
+                if fn.endswith(".sh") and not fn.startswith("defaults-"):
+                    found.setdefault(fn.lower(), os.path.join(d, fn))
+    if not found:
+        sys.exit("%s: no lcg.bits recipes, at its root or in recipes/" % path)
+    return sorted(found.values(), key=os.path.basename)
+
+
 def recipes(path, report):
     """{key: header} of every recipe in an lcg.bits checkout."""
     out = {}
-    for fn in sorted(os.listdir(path)):
-        if not fn.endswith(".sh") or fn.startswith("defaults-"):
-            continue
-        with open(os.path.join(path, fn)) as fh:
+    for f in recipe_files(path):
+        fn = os.path.basename(f)
+        with open(f) as fh:
             head = fh.read().split("\n---", 1)[0]
         try:
             h = yaml.safe_load(head) or {}
